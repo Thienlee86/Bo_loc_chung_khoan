@@ -193,7 +193,10 @@ with st.sidebar:
 
     st.divider()
     st.caption("Phân tích sentiment tin tức")
-    api_key_available = "ANTHROPIC_API_KEY" in st.secrets if hasattr(st, "secrets") else False
+    try:
+        api_key_available = "ANTHROPIC_API_KEY" in st.secrets
+    except Exception:
+        api_key_available = False
     use_claude_sentiment = st.toggle(
         "Dùng Claude API (chính xác hơn, tốn phí nhỏ)",
         value=False,
