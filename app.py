@@ -34,18 +34,37 @@ def fetch_news_cached() -> pd.DataFrame:
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def fetch_history(ticker: str, days_back: int = 500) -> pd.DataFrame:
+    """Lấy dữ liệu giá, thử lần lượt nhiều nguồn vì một số môi trường cloud
+    (như Streamlit Community Cloud) đôi khi bị nguồn VCI chặn/giới hạn IP."""
     from vnstock import Vnstock
+
     end = datetime.now().strftime("%Y-%m-%d")
     start = (datetime.now() - timedelta(days=days_back)).strftime("%Y-%m-%d")
-    stock = Vnstock().stock(symbol=ticker, source="VCI")
-    df = stock.quote.history(start=start, end=end, interval="1D")
-    df = df.rename(columns={
-        "time": "date", "open": "open", "high": "high",
-        "low": "low", "close": "close", "volume": "volume",
-    })
-    df["date"] = pd.to_datetime(df["date"])
-    df = df.sort_values("date").reset_index(drop=True)
-    return df
+
+    last_error = None
+    for source in ["VCI", "TCBS"]:
+        try:
+            stock = Vnstock().stock(symbol=ticker, source=source)
+            df = stock.quote.history(start=start, end=end, interval="1D")
+            if df is not None and not df.empty:
+                df = df.rename(columns={
+                    "time": "date", "open": "open", "high": "high",
+                    "low": "low", "close": "close", "volume": "volume",
+                })
+                df["date"] = pd.to_datetime(df["date"])
+                df = df.sort_values("date").reset_index(drop=True)
+                return df
+        except Exception as e:
+            last_error = e
+            continue
+
+    # Cả 2 nguồn đều thất bại — báo lỗi rõ ràng thay vì mơ hồ
+    raise ConnectionError(
+        f"Không kết nối được tới nguồn dữ liệu VCI lẫn TCBS cho mã {ticker}. "
+        f"Đây thường là lỗi mạng tạm thời từ phía nguồn dữ liệu, không phải lỗi code. "
+        f"Thử lại sau vài phút, hoặc chạy app trên máy cá nhân (ít bị chặn hơn server cloud dùng chung). "
+        f"Chi tiết lỗi gốc: {last_error}"
+    )
 
 
 # ---------------------------------------------------------------------------
