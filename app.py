@@ -2,12 +2,14 @@
 App dự báo xác suất T+1 / T+3 cho cổ phiếu Việt Nam.
 Chạy: streamlit run app.py
 
+Kiến trúc phân tầng:
+  vnstock/RSS (nguồn)  ->  fetch_history/fetch_all_news (kết nối)
+  ->  features.py (chuẩn hoá)  ->  models.py (nghiệp vụ)  ->  app.py (giao diện)
+
 LƯU Ý QUAN TRỌNG:
 - Đây là công cụ THAM KHẢO, không phải khuyến nghị đầu tư.
-- Xác suất mô hình đưa ra phụ thuộc vào dữ liệu lịch sử và không phản ánh
-  các yếu tố tin tức/sự kiện đột xuất xảy ra sau thời điểm dự báo.
-- Độ chính xác thực tế luôn cần đối chiếu với phần "Kiểm định backtest"
-  trước khi tin vào bất kỳ con số nào.
+- Xác suất/vùng giá phụ thuộc dữ liệu lịch sử, không phản ánh tin tức/sự kiện đột xuất.
+- Luôn đối chiếu phần Kiểm định backtest trước khi tin vào con số.
 """
 
 import warnings
@@ -19,29 +21,28 @@ import numpy as np
 from datetime import datetime, timedelta
 
 from news_utils import fetch_all_news, get_news_for_ticker, summarize_sentiment
+from features import build_features, FEATURE_COLS, FEATURE_LABELS
+from models import (
+    walk_forward_eval, confidence_label,
+    train_quantile_models, predict_price_range,
+    quick_train_predict,
+)
 
 st.set_page_config(page_title="Dự báo CK Việt Nam (tham khảo)", layout="wide")
 
 # ---------------------------------------------------------------------------
-# 1. LẤY DỮ LIỆU THẬT (vnstock)
+# TẦNG KẾT NỐI — lấy dữ liệu thật
 # ---------------------------------------------------------------------------
 
 @st.cache_data(ttl=900, show_spinner=False)
 def fetch_news_cached() -> pd.DataFrame:
-    """Cache 15 phút để không spam RSS mỗi lần rerun."""
     return fetch_all_news()
 
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def fetch_history(ticker: str, days_back: int = 500) -> pd.DataFrame:
-    """Lấy dữ liệu giá dùng API mới của vnstock (vnstock.api.quote.Quote) —
-    API cũ (Vnstock().stock()) đã bị deprecate từ 31/08/2025.
-
-    Nếu có VNSTOCK_API_KEY trong secrets, tự động xác thực trước khi gọi —
-    tránh bị chặn 403 do giới hạn IP ẩn danh (hay gặp trên server cloud dùng chung).
-    Đăng ký key miễn phí tại vnstocks.com/login.
-
-    Thử lần lượt nhiều nguồn vì một nguồn có thể tạm thời bị chặn/lỗi."""
+    """API mới của vnstock (vnstock.api.quote.Quote). Tự xác thực VNSTOCK_API_KEY
+    nếu có trong secrets (tránh bị chặn 403). Thử lần lượt nhiều nguồn."""
     from vnstock.api.quote import Quote
 
     try:
@@ -49,7 +50,7 @@ def fetch_history(ticker: str, days_back: int = 500) -> pd.DataFrame:
             import vnai
             vnai.setup_api_key(st.secrets["VNSTOCK_API_KEY"])
     except Exception:
-        pass  # Không có key vẫn chạy được (nhưng dễ bị 403 hơn), không chặn app
+        pass
 
     end = datetime.now().strftime("%Y-%m-%d")
     start = (datetime.now() - timedelta(days=days_back)).strftime("%Y-%m-%d")
@@ -73,139 +74,13 @@ def fetch_history(ticker: str, days_back: int = 500) -> pd.DataFrame:
 
     detail = " | ".join(f"{src}: {msg}" for src, msg in last_errors.items())
     raise ConnectionError(
-        f"Không lấy được dữ liệu cho mã {ticker} từ bất kỳ nguồn nào. "
-        f"Nếu lỗi có chữ '403' hoặc 'Forbidden', khả năng cao cần đăng ký "
-        f"VNSTOCK_API_KEY miễn phí tại vnstocks.com/login rồi thêm vào secrets. "
-        f"Chi tiết từng nguồn: {detail}"
+        f"Không lấy được dữ liệu cho mã {ticker}. Nếu lỗi có '403'/'Forbidden', "
+        f"cần đăng ký VNSTOCK_API_KEY tại vnstocks.com/login. Chi tiết: {detail}"
     )
 
 
 # ---------------------------------------------------------------------------
-# 2. FEATURE ENGINEERING
-# ---------------------------------------------------------------------------
-
-def build_features(df: pd.DataFrame) -> pd.DataFrame:
-    d = df.copy()
-
-    # Đường trung bình & giao cắt
-    d["ma5"] = d["close"].rolling(5).mean()
-    d["ma20"] = d["close"].rolling(20).mean()
-    d["ma_cross"] = (d["ma5"] - d["ma20"]) / d["ma20"]
-
-    # RSI(14)
-    delta = d["close"].diff()
-    gain = delta.clip(lower=0).rolling(14).mean()
-    loss = (-delta.clip(upper=0)).rolling(14).mean()
-    rs = gain / loss.replace(0, np.nan)
-    d["rsi14"] = 100 - (100 / (1 + rs))
-
-    # MACD
-    ema12 = d["close"].ewm(span=12, adjust=False).mean()
-    ema26 = d["close"].ewm(span=26, adjust=False).mean()
-    d["macd"] = ema12 - ema26
-    d["macd_signal"] = d["macd"].ewm(span=9, adjust=False).mean()
-    d["macd_hist"] = d["macd"] - d["macd_signal"]
-
-    # Volume
-    d["vol_ratio"] = d["volume"] / d["volume"].rolling(20).mean()
-
-    # Biến động (ATR đơn giản hoá)
-    tr = pd.concat([
-        d["high"] - d["low"],
-        (d["high"] - d["close"].shift()).abs(),
-        (d["low"] - d["close"].shift()).abs(),
-    ], axis=1).max(axis=1)
-    d["atr14"] = tr.rolling(14).mean() / d["close"]
-
-    # Bollinger %B
-    mid = d["close"].rolling(20).mean()
-    std = d["close"].rolling(20).std()
-    upper, lower = mid + 2 * std, mid - 2 * std
-    d["boll_pctb"] = (d["close"] - lower) / (upper - lower)
-
-    # Lợi nhuận phiên trước (momentum ngắn)
-    d["ret_1"] = d["close"].pct_change(1)
-    d["ret_3"] = d["close"].pct_change(3)
-
-    # Nhãn: tăng/giảm sau 1 phiên và sau 3 phiên
-    d["target_1"] = (d["close"].shift(-1) > d["close"]).astype(int)
-    d["target_3"] = (d["close"].shift(-3) > d["close"]).astype(int)
-
-    return d
-
-
-FEATURE_COLS = ["ma_cross", "rsi14", "macd_hist", "vol_ratio", "atr14", "boll_pctb", "ret_1", "ret_3"]
-FEATURE_LABELS = {
-    "ma_cross": "Giao cắt MA5/MA20", "rsi14": "RSI(14)", "macd_hist": "MACD histogram",
-    "vol_ratio": "Khối lượng / TB20", "atr14": "Biến động (ATR)", "boll_pctb": "Bollinger %B",
-    "ret_1": "Lợi nhuận phiên trước", "ret_3": "Lợi nhuận 3 phiên trước",
-}
-
-
-# ---------------------------------------------------------------------------
-# 3. MÔ HÌNH + WALK-FORWARD BACKTEST
-# ---------------------------------------------------------------------------
-
-def walk_forward_eval(d: pd.DataFrame, target_col: str, min_train: int = 150):
-    """Đánh giá walk-forward: train trên quá khứ, dự báo từng điểm tương lai kế tiếp.
-    Trả về accuracy mô hình, accuracy baseline (đoán theo xu hướng phiên trước), và model cuối cùng."""
-    from lightgbm import LGBMClassifier
-
-    data = d.dropna(subset=FEATURE_COLS + [target_col]).reset_index(drop=True)
-    if len(data) < min_train + 20:
-        return None
-
-    preds, actuals, baseline_preds = [], [], []
-    step = 5  # train lại mỗi 5 phiên để đỡ tốn thời gian, vẫn giữ tính walk-forward
-
-    for i in range(min_train, len(data) - 1, step):
-        train = data.iloc[:i]
-        test = data.iloc[i:i + step]
-        if len(test) == 0 or train[target_col].nunique() < 2:
-            continue
-
-        model = LGBMClassifier(
-            n_estimators=80, max_depth=3, learning_rate=0.08,
-            subsample=0.8, colsample_bytree=0.8, verbose=-1,
-        )
-        model.fit(train[FEATURE_COLS], train[target_col])
-        p = model.predict(test[FEATURE_COLS])
-
-        preds.extend(p)
-        actuals.extend(test[target_col].tolist())
-        # baseline: đoán lặp lại xu hướng phiên gần nhất (ret_1 > 0 → đoán tăng)
-        baseline_preds.extend((test["ret_1"] > 0).astype(int).tolist())
-
-    if not preds:
-        return None
-
-    acc = float(np.mean(np.array(preds) == np.array(actuals)))
-    baseline_acc = float(np.mean(np.array(baseline_preds) == np.array(actuals)))
-
-    # Model cuối cùng huấn luyện trên toàn bộ dữ liệu để dự báo phiên tới
-    final_model = LGBMClassifier(
-        n_estimators=80, max_depth=3, learning_rate=0.08,
-        subsample=0.8, colsample_bytree=0.8, verbose=-1,
-    )
-    final_model.fit(data[FEATURE_COLS], data[target_col])
-
-    return {
-        "accuracy": acc, "baseline_accuracy": baseline_acc,
-        "n_test": len(preds), "model": final_model,
-    }
-
-
-def confidence_label(acc: float, baseline: float) -> str:
-    edge = acc - baseline
-    if edge >= 0.06:
-        return "cao"
-    if edge >= 0.02:
-        return "trung bình"
-    return "thấp — gần bằng đoán ngẫu nhiên"
-
-
-# ---------------------------------------------------------------------------
-# 4. GIAO DIỆN
+# GIAO DIỆN
 # ---------------------------------------------------------------------------
 
 st.title("Dự báo xác suất T+1 / T+3 — Cổ phiếu Việt Nam")
@@ -214,21 +89,32 @@ st.caption("Công cụ tham khảo · dữ liệu thật qua vnstock · không p
 st.warning(
     "⚠️ Đây là công cụ **tham khảo**, không đảm bảo chính xác. Mô hình chỉ học từ dữ liệu "
     "giá/khối lượng lịch sử — **không** biết trước tin tức, sự kiện doanh nghiệp, hay biến động "
-    "vĩ mô đột xuất. Luôn xem phần Kiểm định backtest bên dưới trước khi diễn giải xác suất.",
+    "vĩ mô đột xuất. Luôn xem phần Kiểm định backtest trước khi diễn giải xác suất/vùng giá.",
     icon="⚠️",
 )
 
+try:
+    api_key_available = "ANTHROPIC_API_KEY" in st.secrets
+except Exception:
+    api_key_available = False
+
 with st.sidebar:
     st.header("Cấu hình")
-    ticker = st.text_input("Mã cổ phiếu", value="VNM").strip().upper()
+    ticker = st.text_input("Mã cổ phiếu (xem chi tiết)", value="VNM").strip().upper()
     days_back = st.slider("Số ngày dữ liệu lịch sử", 250, 1000, 500, step=50)
+    run = st.button("Chạy dự báo chi tiết", type="primary", use_container_width=True)
+
+    st.divider()
+    st.subheader("Xếp hạng nhiều mã")
+    tickers_raw = st.text_area(
+        "Danh sách mã (cách nhau bởi dấu phẩy)",
+        value="VNM, VCB, HPG, FPT, VIC",
+        height=80,
+    )
+    screen_run = st.button("Xếp hạng danh mục", use_container_width=True)
 
     st.divider()
     st.caption("Phân tích sentiment tin tức")
-    try:
-        api_key_available = "ANTHROPIC_API_KEY" in st.secrets
-    except Exception:
-        api_key_available = False
     use_claude_sentiment = st.toggle(
         "Dùng Claude API (chính xác hơn, tốn phí nhỏ)",
         value=False,
@@ -239,7 +125,71 @@ with st.sidebar:
     if not api_key_available:
         st.caption("⚠️ Chưa tìm thấy API key. Xem README để cấu hình.")
 
-    run = st.button("Chạy dự báo", type="primary", use_container_width=True)
+
+# ---------------------------------------------------------------------------
+# BẢNG XẾP HẠNG NHIỀU MÃ
+# ---------------------------------------------------------------------------
+
+if screen_run:
+    tickers_list = [t.strip().upper() for t in tickers_raw.split(",") if t.strip()]
+    if not tickers_list:
+        st.warning("Nhập ít nhất 1 mã để xếp hạng.")
+    elif len(tickers_list) > 15:
+        st.warning("Giới hạn tối đa 15 mã mỗi lần để tránh chờ quá lâu.")
+    else:
+        st.subheader("📊 Bảng xếp hạng xác suất tăng (tham khảo nhanh)")
+        st.caption(
+            "⚠️ Bảng này dùng kiểm định **nhanh** (1 lần chia train/test), KHÔNG phải "
+            "walk-forward đầy đủ như phần xem chi tiết 1 mã bên dưới. Dùng để rút gọn "
+            "danh sách cần xem kỹ, không phải căn cứ quyết định cuối cùng."
+        )
+
+        progress = st.progress(0.0, text="Đang xử lý...")
+        rows = []
+        for i, tk in enumerate(tickers_list):
+            progress.progress((i + 1) / len(tickers_list), text=f"Đang xử lý {tk}...")
+            try:
+                raw = fetch_history(tk, days_back=500)
+                if raw.empty or len(raw) < 200:
+                    continue
+                feats = build_features(raw)
+                r1 = quick_train_predict(feats, "target_1")
+                r3 = quick_train_predict(feats, "target_3")
+                if r1 is None or r3 is None:
+                    continue
+                last_price = raw["close"].iloc[-1]
+                chg = (raw["close"].iloc[-1] / raw["close"].iloc[-2] - 1) * 100
+                rows.append({
+                    "Mã": tk, "Giá": f"{last_price:,.0f}", "% ngày": f"{chg:+.2f}%",
+                    "Xác suất tăng T+1": r1["probability"],
+                    "Xác suất tăng T+3": r3["probability"],
+                    "Acc nhanh T+1": r1["quick_accuracy"],
+                })
+            except Exception as e:
+                st.caption(f"Bỏ qua {tk}: {e}")
+                continue
+        progress.empty()
+
+        if rows:
+            rank_df = pd.DataFrame(rows).sort_values("Xác suất tăng T+1", ascending=False)
+            display_df = rank_df.copy()
+            display_df["Xác suất tăng T+1"] = display_df["Xác suất tăng T+1"].apply(lambda x: f"{x*100:.0f}%")
+            display_df["Xác suất tăng T+3"] = display_df["Xác suất tăng T+3"].apply(lambda x: f"{x*100:.0f}%")
+            display_df["Acc nhanh T+1"] = display_df["Acc nhanh T+1"].apply(lambda x: f"{x*100:.0f}%")
+            st.dataframe(display_df, hide_index=True, use_container_width=True)
+            st.caption(
+                "Mẹo: mã có 'Acc nhanh T+1' thấp gần 50% nghĩa là mô hình gần như đoán ngẫu nhiên "
+                "cho mã đó — xác suất tăng của nó kém tin cậy hơn, dù con số có thể cao."
+            )
+        else:
+            st.error("Không lấy được dữ liệu cho mã nào trong danh sách.")
+
+    st.divider()
+
+
+# ---------------------------------------------------------------------------
+# XEM CHI TIẾT 1 MÃ
+# ---------------------------------------------------------------------------
 
 if run and ticker:
     with st.spinner(f"Đang lấy dữ liệu {ticker}..."):
@@ -261,8 +211,9 @@ if run and ticker:
         st.line_chart(raw.set_index("date")["close"])
     with col_info:
         last = raw.iloc[-1]
+        current_price = float(last["close"])
         chg = (raw["close"].iloc[-1] / raw["close"].iloc[-2] - 1) * 100
-        st.metric("Giá đóng cửa gần nhất", f"{last['close']:,.0f} đ", f"{chg:+.2f}%")
+        st.metric("Giá đóng cửa gần nhất", f"{current_price:,.0f} đ", f"{chg:+.2f}%")
         st.metric("Khối lượng phiên gần nhất", f"{last['volume']:,.0f}")
 
     st.divider()
@@ -289,6 +240,39 @@ if run and ticker:
             st.progress(float(prob) if prob >= 0.5 else float(1 - prob))
             st.markdown(f"### {prob*100:.0f}% khả năng {direction}")
             st.caption(f"Độ tin cậy dự báo: **{conf}** · (dựa trên chênh lệch accuracy mô hình vs baseline)")
+
+    # -----------------------------------------------------------------
+    # VÙNG GIÁ DỰ BÁO (quantile regression)
+    # -----------------------------------------------------------------
+    st.divider()
+    st.subheader("Vùng giá dự báo (tham khảo)")
+    st.caption(
+        "Khoảng giá phản ánh **đúng mức biến động thực tế** của mã trong quá khứ — "
+        "có thể rộng, đây không phải lỗi mà là bản chất của dự báo ngắn hạn. "
+        "Khoảng hẹp giả tạo sẽ gây hiểu lầm nguy hiểm hơn khoảng rộng trung thực."
+    )
+
+    with st.spinner("Đang tính vùng giá..."):
+        qmodels_1 = train_quantile_models(feats, "fut_ret_1")
+        qmodels_3 = train_quantile_models(feats, "fut_ret_3")
+
+    if qmodels_1 and qmodels_3:
+        range1 = predict_price_range(qmodels_1, latest_row, current_price)
+        range3 = predict_price_range(qmodels_3, latest_row, current_price)
+
+        rc1, rc2 = st.columns(2)
+        for col, label, rg in [(rc1, "T+1", range1), (rc2, "T+3", range3)]:
+            with col:
+                st.markdown(f"**Vùng giá {label}**")
+                st.markdown(
+                    f"### {rg['lo_price']:,.0f} — {rg['hi_price']:,.0f} đ"
+                )
+                st.caption(
+                    f"Trung vị: {rg['mid_price']:,.0f}đ ({rg['mid_pct']:+.1f}%) · "
+                    f"Khoảng 10%-90% phân vị lịch sử"
+                )
+    else:
+        st.info("Không đủ dữ liệu để tính vùng giá quantile cho mã này.")
 
     st.divider()
     st.subheader("Kiểm định backtest (walk-forward)")
@@ -318,12 +302,12 @@ if run and ticker:
     st.info(
         "Mô hình **không** đưa các yếu tố tin tức, công bố thông tin doanh nghiệp, hay biến động "
         "vĩ mô bất ngờ vào tính toán. Nếu có sự kiện lớn sắp diễn ra (họp ĐHCĐ, công bố KQKD, tin vĩ mô), "
-        "xác suất ở trên nên được xem xét thận trọng hơn.",
+        "xác suất/vùng giá ở trên nên được xem xét thận trọng hơn.",
         icon="ℹ️",
     )
 
     # -----------------------------------------------------------------
-    # PANEL TIN TỨC — TÁCH BIỆT HOÀN TOÀN VỚI MÔ HÌNH/BACKTEST Ở TRÊN
+    # PANEL TIN TỨC
     # -----------------------------------------------------------------
     st.divider()
     st.subheader("📰 Tin tức liên quan (tham khảo — chưa đưa vào mô hình)")
@@ -371,5 +355,6 @@ if run and ticker:
     else:
         st.write("Chưa có dữ liệu tin tức để hiển thị.")
 
-else:
-    st.info("Nhập mã cổ phiếu ở thanh bên trái và bấm **Chạy dự báo** để bắt đầu.")
+elif not screen_run:
+    st.info("Nhập mã cổ phiếu ở thanh bên trái và bấm **Chạy dự báo chi tiết**, "
+            "hoặc dùng **Xếp hạng danh mục** để lọc nhanh nhiều mã cùng lúc.")
