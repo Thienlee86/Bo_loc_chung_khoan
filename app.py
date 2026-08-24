@@ -34,18 +34,31 @@ def fetch_news_cached() -> pd.DataFrame:
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def fetch_history(ticker: str, days_back: int = 500) -> pd.DataFrame:
-    """Lấy dữ liệu giá, thử lần lượt nhiều nguồn vì một số môi trường cloud
-    (như Streamlit Community Cloud) đôi khi bị nguồn VCI chặn/giới hạn IP."""
-    from vnstock import Vnstock
+    """Lấy dữ liệu giá dùng API mới của vnstock (vnstock.api.quote.Quote) —
+    API cũ (Vnstock().stock()) đã bị deprecate từ 31/08/2025.
+
+    Nếu có VNSTOCK_API_KEY trong secrets, tự động xác thực trước khi gọi —
+    tránh bị chặn 403 do giới hạn IP ẩn danh (hay gặp trên server cloud dùng chung).
+    Đăng ký key miễn phí tại vnstocks.com/login.
+
+    Thử lần lượt nhiều nguồn vì một nguồn có thể tạm thời bị chặn/lỗi."""
+    from vnstock.api.quote import Quote
+
+    try:
+        if "VNSTOCK_API_KEY" in st.secrets:
+            import vnai
+            vnai.setup_api_key(st.secrets["VNSTOCK_API_KEY"])
+    except Exception:
+        pass  # Không có key vẫn chạy được (nhưng dễ bị 403 hơn), không chặn app
 
     end = datetime.now().strftime("%Y-%m-%d")
     start = (datetime.now() - timedelta(days=days_back)).strftime("%Y-%m-%d")
 
-    last_error = None
-    for source in ["VCI", "TCBS"]:
+    last_errors = {}
+    for source in ["VCI", "MSN", "KBS"]:
         try:
-            stock = Vnstock().stock(symbol=ticker, source=source)
-            df = stock.quote.history(start=start, end=end, interval="1D")
+            q = Quote(symbol=ticker, source=source)
+            df = q.history(start=start, end=end, interval="1D")
             if df is not None and not df.empty:
                 df = df.rename(columns={
                     "time": "date", "open": "open", "high": "high",
@@ -55,15 +68,15 @@ def fetch_history(ticker: str, days_back: int = 500) -> pd.DataFrame:
                 df = df.sort_values("date").reset_index(drop=True)
                 return df
         except Exception as e:
-            last_error = e
+            last_errors[source] = str(e)
             continue
 
-    # Cả 2 nguồn đều thất bại — báo lỗi rõ ràng thay vì mơ hồ
+    detail = " | ".join(f"{src}: {msg}" for src, msg in last_errors.items())
     raise ConnectionError(
-        f"Không kết nối được tới nguồn dữ liệu VCI lẫn TCBS cho mã {ticker}. "
-        f"Đây thường là lỗi mạng tạm thời từ phía nguồn dữ liệu, không phải lỗi code. "
-        f"Thử lại sau vài phút, hoặc chạy app trên máy cá nhân (ít bị chặn hơn server cloud dùng chung). "
-        f"Chi tiết lỗi gốc: {last_error}"
+        f"Không lấy được dữ liệu cho mã {ticker} từ bất kỳ nguồn nào. "
+        f"Nếu lỗi có chữ '403' hoặc 'Forbidden', khả năng cao cần đăng ký "
+        f"VNSTOCK_API_KEY miễn phí tại vnstocks.com/login rồi thêm vào secrets. "
+        f"Chi tiết từng nguồn: {detail}"
     )
 
 
