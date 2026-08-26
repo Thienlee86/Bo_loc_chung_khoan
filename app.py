@@ -27,6 +27,10 @@ from models import (
     train_quantile_models, predict_price_range,
     quick_train_predict,
 )
+from signals import (
+    add_signal_columns, event_study, compute_relative_strength,
+    composite_signal,
+)
 
 st.set_page_config(page_title="Dự báo CK Việt Nam (tham khảo)", layout="wide")
 
@@ -79,6 +83,16 @@ def fetch_history(ticker: str, days_back: int = 500) -> pd.DataFrame:
     )
 
 
+@st.cache_data(ttl=3600, show_spinner=False)
+def fetch_vnindex(days_back: int = 500):
+    """Lấy dữ liệu VN-Index để tính sức mạnh tương đối. Trả về None nếu lỗi —
+    không nên làm sập cả app chỉ vì thiếu 1 lớp tín hiệu phụ."""
+    try:
+        return fetch_history("VNINDEX", days_back)
+    except Exception:
+        return None
+
+
 # ---------------------------------------------------------------------------
 # GIAO DIỆN
 # ---------------------------------------------------------------------------
@@ -103,7 +117,6 @@ with st.sidebar:
     ticker = st.text_input("Mã cổ phiếu (xem chi tiết)", value="VNM").strip().upper()
     days_back = st.slider("Số ngày dữ liệu lịch sử", 250, 1000, 500, step=50)
     run = st.button("Chạy dự báo chi tiết", type="primary", use_container_width=True)
-
     st.divider()
     st.subheader("Xếp hạng nhiều mã")
     tickers_raw = st.text_area(
@@ -127,6 +140,35 @@ with st.sidebar:
 
 
 # ---------------------------------------------------------------------------
+# KẾT QUẢ QUÉT TỰ ĐỘNG (nếu có, từ GitHub Actions chạy sáng nay)
+# ---------------------------------------------------------------------------
+
+import json as _json
+import os as _os
+
+if _os.path.exists("signals_latest.json"):
+    try:
+        with open("signals_latest.json", "r", encoding="utf-8") as f:
+            scan_data = _json.load(f)
+        st.subheader("🌅 Kết quả quét tự động gần nhất")
+        st.caption(f"Quét lúc: {scan_data['scanned_at']} · {len(scan_data['results'])} mã")
+        if scan_data["results"]:
+            scan_df = pd.DataFrame(scan_data["results"])
+            scan_df["probability_t1"] = scan_df["probability_t1"].apply(lambda x: f"{x*100:.0f}%")
+            scan_df["quick_accuracy"] = scan_df["quick_accuracy"].apply(lambda x: f"{x*100:.0f}%")
+            scan_df["volume_spike"] = scan_df["volume_spike"].apply(lambda x: "🟡 Có" if x else "⚪ Không")
+            scan_df = scan_df.rename(columns={
+                "ticker": "Mã", "price": "Giá", "change_pct": "% ngày",
+                "probability_t1": "Xác suất T+1", "quick_accuracy": "Acc nhanh",
+                "volume_spike": "Khối lượng bất thường", "relative_strength": "Sức mạnh tương đối",
+            })
+            st.dataframe(scan_df, hide_index=True, use_container_width=True)
+        st.divider()
+    except Exception:
+        pass  # File lỗi/hỏng không nên chặn phần còn lại của app
+
+
+# ---------------------------------------------------------------------------
 # BẢNG XẾP HẠNG NHIỀU MÃ
 # ---------------------------------------------------------------------------
 
@@ -145,6 +187,7 @@ if screen_run:
         )
 
         progress = st.progress(0.0, text="Đang xử lý...")
+        vnindex_for_screen = fetch_vnindex(500)  # lấy 1 lần, dùng chung cho mọi mã trong danh mục
         rows = []
         for i, tk in enumerate(tickers_list):
             progress.progress((i + 1) / len(tickers_list), text=f"Đang xử lý {tk}...")
@@ -159,11 +202,29 @@ if screen_run:
                     continue
                 last_price = raw["close"].iloc[-1]
                 chg = (raw["close"].iloc[-1] / raw["close"].iloc[-2] - 1) * 100
+
+                # Đếm nhanh số lớp đồng thuận (không tính lớp tin tức để giữ tốc độ)
+                feats_sig = add_signal_columns(feats)
+                latest_vol_spike = bool(feats_sig["vol_spike"].iloc[-1])
+                rel_strength_tk = None
+                if vnindex_for_screen is not None:
+                    rel_df_tk = compute_relative_strength(raw, vnindex_for_screen)
+                    if not rel_df_tk.dropna().empty:
+                        rel_strength_tk = float(rel_df_tk["rel_strength"].dropna().iloc[-1])
+
+                votes = 0
+                if r1["probability"] >= 0.55:
+                    votes += 1
+                if rel_strength_tk is not None and rel_strength_tk > 0.02:
+                    votes += 1
+
                 rows.append({
                     "Mã": tk, "Giá": f"{last_price:,.0f}", "% ngày": f"{chg:+.2f}%",
                     "Xác suất tăng T+1": r1["probability"],
                     "Xác suất tăng T+3": r3["probability"],
                     "Acc nhanh T+1": r1["quick_accuracy"],
+                    "Khối lượng bất thường": "🟡 Có" if latest_vol_spike else "⚪ Không",
+                    "Tín hiệu đồng thuận (tối đa 2)": votes,
                 })
             except Exception as e:
                 st.caption(f"Bỏ qua {tk}: {e}")
@@ -171,13 +232,17 @@ if screen_run:
         progress.empty()
 
         if rows:
-            rank_df = pd.DataFrame(rows).sort_values("Xác suất tăng T+1", ascending=False)
+            rank_df = pd.DataFrame(rows).sort_values(
+                ["Tín hiệu đồng thuận (tối đa 2)", "Xác suất tăng T+1"], ascending=False
+            )
             display_df = rank_df.copy()
             display_df["Xác suất tăng T+1"] = display_df["Xác suất tăng T+1"].apply(lambda x: f"{x*100:.0f}%")
             display_df["Xác suất tăng T+3"] = display_df["Xác suất tăng T+3"].apply(lambda x: f"{x*100:.0f}%")
             display_df["Acc nhanh T+1"] = display_df["Acc nhanh T+1"].apply(lambda x: f"{x*100:.0f}%")
             st.dataframe(display_df, hide_index=True, use_container_width=True)
             st.caption(
+                "Cột 'Tín hiệu đồng thuận' đếm nhanh 2 lớp (mô hình + sức mạnh tương đối vs VN-Index), "
+                "chưa gồm tin tức để giữ tốc độ. Xem chi tiết đầy đủ 4 lớp ở phần 'Chạy dự báo chi tiết' bên dưới. "
                 "Mẹo: mã có 'Acc nhanh T+1' thấp gần 50% nghĩa là mô hình gần như đoán ngẫu nhiên "
                 "cho mã đó — xác suất tăng của nó kém tin cậy hơn, dù con số có thể cao."
             )
@@ -240,6 +305,78 @@ if run and ticker:
             st.progress(float(prob) if prob >= 0.5 else float(1 - prob))
             st.markdown(f"### {prob*100:.0f}% khả năng {direction}")
             st.caption(f"Độ tin cậy dự báo: **{conf}** · (dựa trên chênh lệch accuracy mô hình vs baseline)")
+
+    # -----------------------------------------------------------------
+    # TÍN HIỆU PHÁT HIỆN SỚM — tổng hợp 4 lớp độc lập
+    # -----------------------------------------------------------------
+    st.divider()
+    st.subheader("🔎 Tín hiệu phát hiện sớm (tổng hợp nhiều lớp)")
+    st.caption(
+        "Đây KHÔNG phải khuyến nghị mua/bán. Chỉ là tổng hợp nhiều góc nhìn độc lập "
+        "để bạn tự đánh giá — công cụ tham khảo cá nhân, không thay thế phân tích "
+        "của người có chứng chỉ hành nghề chứng khoán."
+    )
+
+    feats_sig = add_signal_columns(feats)
+    latest_sig_row = feats_sig.iloc[-1]
+
+    with st.spinner("Đang lấy VN-Index để tính sức mạnh tương đối..."):
+        vnindex_df = fetch_vnindex(days_back)
+
+    latest_rel_strength = None
+    if vnindex_df is not None and not vnindex_df.empty:
+        rel_df = compute_relative_strength(raw, vnindex_df)
+        if not rel_df.dropna().empty:
+            latest_rel_strength = float(rel_df["rel_strength"].dropna().iloc[-1])
+
+    # Tái sử dụng tin tức đã lấy (tính trước ở đây, phần hiển thị đầy đủ ở dưới)
+    try:
+        news_df_for_signal = fetch_news_cached()
+        ticker_news_for_signal = get_news_for_ticker(ticker, news_df_for_signal)
+        news_summary_for_signal = summarize_sentiment(ticker_news_for_signal)
+    except Exception:
+        news_summary_for_signal = {"n_news": 0, "overall": "Chưa có tin"}
+
+    combo = composite_signal(
+        ml_prob_1=float(prob1),
+        latest_vol_spike=bool(latest_sig_row["vol_spike"]),
+        latest_rel_strength=latest_rel_strength,
+        news_summary=news_summary_for_signal,
+    )
+
+    sig_cols = st.columns(4)
+    for (label, value), col in zip(combo["details"].items(), sig_cols):
+        with col:
+            st.markdown(f"**{label}**")
+            st.markdown(value)
+
+    st.markdown(f"### {combo['verdict']}")
+    st.caption(f"Phiếu đồng thuận: {combo['votes_bull']} tăng · {combo['votes_bear']} giảm (trên tối đa 3 lớp có phiếu)")
+
+    with st.expander("📈 Kiểm định tín hiệu quy tắc bằng dữ liệu lịch sử (event-study)"):
+        st.caption(
+            "Tín hiệu quy tắc: RSI cắt lên/xuống mốc 50 + khối lượng đột biến (>1.5x TB20) "
+            "+ xu hướng MA ủng hộ. Đây là tín hiệu ĐƠN GIẢN HƠN mô hình ML ở trên, nhưng "
+            "kiểm định được trên toàn bộ lịch sử để biết có thật sự có 'edge' hay không."
+        )
+        es_bull = event_study(feats_sig, "signal_bull", "fut_ret_1")
+        es_bear = event_study(feats_sig, "signal_bear", "fut_ret_1")
+
+        for name, es in [("Tín hiệu TĂNG (rule-based)", es_bull), ("Tín hiệu GIẢM (rule-based)", es_bear)]:
+            st.markdown(f"**{name}**")
+            if es.get("insufficient"):
+                st.write(f"Chỉ có {es['n_events']} lần xuất hiện trong lịch sử — chưa đủ để kết luận đáng tin cậy.")
+            else:
+                st.write(
+                    f"Xuất hiện {es['n_events']} lần trong quá khứ. Khi tín hiệu này xảy ra, "
+                    f"lợi nhuận T+1 trung bình là **{es['event_mean_return']*100:+.2f}%** "
+                    f"(so với baseline mọi phiên: {es['baseline_mean_return']*100:+.2f}%) — "
+                    f"chênh lệch **{es['edge_return']*100:+.2f}pp**. "
+                    f"Tỷ lệ tăng giá sau tín hiệu: {es['event_pct_positive']*100:.0f}% "
+                    f"(baseline: {es['baseline_pct_positive']*100:.0f}%)."
+                )
+                if abs(es['edge_return']) < 0.002:
+                    st.caption("⚠️ Chênh lệch quá nhỏ — tín hiệu này có thể không có edge thật sự với mã này.")
 
     # -----------------------------------------------------------------
     # VÙNG GIÁ DỰ BÁO (quantile regression)
