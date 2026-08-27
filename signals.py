@@ -181,3 +181,4 @@ def compute_risk_levels(current_price: float, atr_pct: float, rr_ratio: float = 
         "take_profit_pct": stop_distance_pct * rr_ratio * 100,
         "risk_reward_ratio": rr_ratio,
     }
+    
