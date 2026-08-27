@@ -35,3 +35,4 @@ jobs:
           git add signals_latest.json
           git diff --staged --quiet || git commit -m "Cập nhật kết quả quét $(date +'%Y-%m-%d %H:%M')"
           git push
+
