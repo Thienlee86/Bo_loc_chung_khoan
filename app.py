@@ -119,10 +119,17 @@ with st.sidebar:
     run = st.button("Chạy dự báo chi tiết", type="primary", use_container_width=True)
     st.divider()
     st.subheader("Xếp hạng nhiều mã")
+    if st.button("Điền nhanh 15 mã đầu VN30", use_container_width=True):
+        st.session_state["tickers_raw_value"] = "ACB, BID, BSR, BVH, CTG, FPT, GAS, GVR, HDB, HPG, MBB, MSN, MWG, PLX, POW"
     tickers_raw = st.text_area(
         "Danh sách mã (cách nhau bởi dấu phẩy)",
-        value="VNM, VCB, HPG, FPT, VIC",
+        value=st.session_state.get("tickers_raw_value", "VNM, VCB, HPG, FPT, VIC"),
         height=80,
+        key="tickers_raw_value",
+    )
+    min_trade_value = st.slider(
+        "Lọc thanh khoản tối thiểu (tỷ đ/phiên)", 0.0, 10.0, 2.0, step=0.5,
+        help="Mã có giá trị giao dịch trung bình 20 phiên thấp hơn mức này sẽ bị loại khỏi bảng xếp hạng.",
     )
     screen_run = st.button("Xếp hạng danh mục", use_container_width=True)
 
@@ -140,32 +147,58 @@ with st.sidebar:
 
 
 # ---------------------------------------------------------------------------
-# KẾT QUẢ QUÉT TỰ ĐỘNG (nếu có, từ GitHub Actions chạy sáng nay)
+# KẾT QUẢ QUÉT TỰ ĐỘNG — MÀN HÌNH CHÍNH (Giai đoạn 1: đẩy lên hàng đầu)
 # ---------------------------------------------------------------------------
 
 import json as _json
 import os as _os
 
+st.markdown("## 🌅 Bảng tin sáng nay — VN30")
+
 if _os.path.exists("signals_latest.json"):
     try:
         with open("signals_latest.json", "r", encoding="utf-8") as f:
             scan_data = _json.load(f)
-        st.subheader("🌅 Kết quả quét tự động gần nhất")
-        st.caption(f"Quét lúc: {scan_data['scanned_at']} · {len(scan_data['results'])} mã")
+        st.caption(
+            f"Quét lúc: {scan_data['scanned_at']} · {len(scan_data['results'])} mã đạt tiêu chuẩn "
+            f"thanh khoản (trên tổng {len(scan_data.get('watchlist', []))} mã trong danh mục VN30)"
+        )
         if scan_data["results"]:
-            scan_df = pd.DataFrame(scan_data["results"])
+            scan_df = pd.DataFrame(scan_data["results"]).sort_values("probability_t1", ascending=False)
             scan_df["probability_t1"] = scan_df["probability_t1"].apply(lambda x: f"{x*100:.0f}%")
             scan_df["quick_accuracy"] = scan_df["quick_accuracy"].apply(lambda x: f"{x*100:.0f}%")
             scan_df["volume_spike"] = scan_df["volume_spike"].apply(lambda x: "🟡 Có" if x else "⚪ Không")
+            scan_df["relative_strength"] = scan_df["relative_strength"].apply(
+                lambda x: f"{x*100:+.1f}%" if x is not None else "N/A"
+            )
+            if "avg_trade_value_bn" in scan_df.columns:
+                scan_df["avg_trade_value_bn"] = scan_df["avg_trade_value_bn"].apply(lambda x: f"{x:,.1f} tỷ")
             scan_df = scan_df.rename(columns={
                 "ticker": "Mã", "price": "Giá", "change_pct": "% ngày",
                 "probability_t1": "Xác suất T+1", "quick_accuracy": "Acc nhanh",
-                "volume_spike": "Khối lượng bất thường", "relative_strength": "Sức mạnh tương đối",
+                "volume_spike": "KL bất thường", "relative_strength": "Mạnh/yếu vs VN-Index",
+                "avg_trade_value_bn": "GTGD TB/phiên",
             })
             st.dataframe(scan_df, hide_index=True, use_container_width=True)
-        st.divider()
+            st.caption(
+                "Đã tự động loại các mã có giá trị giao dịch trung bình dưới 2 tỷ đ/phiên "
+                "(thanh khoản quá thấp, tín hiệu kỹ thuật dễ bị nhiễu). "
+                "Đây là kết quả quét nhanh — bấm 'Chạy dự báo chi tiết' ở mã bạn quan tâm để xem đầy đủ "
+                "backtest, vùng giá, và kiểm định tín hiệu trước khi cân nhắc."
+            )
+        else:
+            st.info("Lần quét gần nhất không có mã nào đạt tiêu chuẩn thanh khoản.")
     except Exception:
-        pass  # File lỗi/hỏng không nên chặn phần còn lại của app
+        st.warning("File kết quả quét bị lỗi hoặc chưa đầy đủ. Thử chạy lại workflow trên GitHub Actions.")
+else:
+    st.info(
+        "**Chưa có kết quả quét tự động.** App đang ở chế độ chờ — bạn cần bật tính năng quét hằng ngày "
+        "qua GitHub Actions (xem mục 'Tự động quét mỗi sáng' trong README) để bảng này tự có dữ liệu mỗi "
+        "khi bạn mở app, không cần tự bấm nút. Trong lúc chờ, bạn vẫn dùng được phần 'Xếp hạng danh mục' "
+        "hoặc 'Chạy dự báo chi tiết' ở sidebar bên trái."
+    )
+
+st.divider()
 
 
 # ---------------------------------------------------------------------------
@@ -203,6 +236,11 @@ if screen_run:
                 last_price = raw["close"].iloc[-1]
                 chg = (raw["close"].iloc[-1] / raw["close"].iloc[-2] - 1) * 100
 
+                avg_trade_value_bn = float((raw["close"] * raw["volume"]).tail(20).mean()) / 1e9
+                if avg_trade_value_bn < min_trade_value:
+                    st.caption(f"Bỏ qua {tk}: thanh khoản {avg_trade_value_bn:.2f} tỷ đ/phiên, dưới ngưỡng lọc")
+                    continue
+
                 # Đếm nhanh số lớp đồng thuận (không tính lớp tin tức để giữ tốc độ)
                 feats_sig = add_signal_columns(feats)
                 latest_vol_spike = bool(feats_sig["vol_spike"].iloc[-1])
@@ -224,6 +262,7 @@ if screen_run:
                     "Xác suất tăng T+3": r3["probability"],
                     "Acc nhanh T+1": r1["quick_accuracy"],
                     "Khối lượng bất thường": "🟡 Có" if latest_vol_spike else "⚪ Không",
+                    "GTGD TB/phiên": f"{avg_trade_value_bn:,.1f} tỷ",
                     "Tín hiệu đồng thuận (tối đa 2)": votes,
                 })
             except Exception as e:
