@@ -29,8 +29,9 @@ from models import (
 )
 from signals import (
     add_signal_columns, event_study, compute_relative_strength,
-    composite_signal,
+    composite_signal, compute_risk_levels,
 )
+from market_context import analyze_market_context, context_advisory_note
 
 st.set_page_config(page_title="Dự báo CK Việt Nam (tham khảo)", layout="wide")
 
@@ -154,6 +155,21 @@ import json as _json
 import os as _os
 
 st.markdown("## 🌅 Bảng tin sáng nay — VN30")
+
+with st.spinner("Đang lấy bối cảnh thị trường chung (VN-Index)..."):
+    vnindex_top = fetch_vnindex(300)
+market_ctx = analyze_market_context(vnindex_top)
+
+if market_ctx:
+    mc1, mc2, mc3 = st.columns(3)
+    mc1.metric("Xu hướng VN-Index", f"{market_ctx['trend_icon']} {market_ctx['trend']}")
+    mc2.metric("Mức biến động", f"{market_ctx['volatility_icon']} {market_ctx['volatility_level']}")
+    mc3.metric("VN-Index thay đổi 5 phiên", f"{market_ctx['change_5d_pct']:+.2f}%" if market_ctx['change_5d_pct'] is not None else "N/A")
+    st.caption(f"💡 {context_advisory_note(market_ctx)}")
+else:
+    st.caption("Không lấy được bối cảnh VN-Index — các tín hiệu bên dưới nên được đọc độc lập, thận trọng hơn.")
+
+st.divider()
 
 if _os.path.exists("signals_latest.json"):
     try:
@@ -346,6 +362,28 @@ if run and ticker:
             st.caption(f"Độ tin cậy dự báo: **{conf}** · (dựa trên chênh lệch accuracy mô hình vs baseline)")
 
     # -----------------------------------------------------------------
+    # BỐI CẢNH THỊ TRƯỜNG CHUNG (VN-Index) — đọc trước khi xem tín hiệu riêng của mã
+    # -----------------------------------------------------------------
+    st.divider()
+    st.subheader("🌐 Bối cảnh thị trường chung")
+
+    with st.spinner("Đang lấy VN-Index..."):
+        vnindex_df = fetch_vnindex(days_back)
+
+    market_ctx_detail = analyze_market_context(vnindex_df)
+    if market_ctx_detail:
+        bc1, bc2, bc3 = st.columns(3)
+        bc1.metric("Xu hướng VN-Index", f"{market_ctx_detail['trend_icon']} {market_ctx_detail['trend']}")
+        bc2.metric("Mức biến động", f"{market_ctx_detail['volatility_icon']} {market_ctx_detail['volatility_level']}")
+        bc3.metric(
+            "VN-Index 5 phiên",
+            f"{market_ctx_detail['change_5d_pct']:+.2f}%" if market_ctx_detail['change_5d_pct'] is not None else "N/A",
+        )
+        st.caption(f"💡 {context_advisory_note(market_ctx_detail)}")
+    else:
+        st.caption("Không lấy được bối cảnh VN-Index.")
+
+    # -----------------------------------------------------------------
     # TÍN HIỆU PHÁT HIỆN SỚM — tổng hợp 4 lớp độc lập
     # -----------------------------------------------------------------
     st.divider()
@@ -358,9 +396,6 @@ if run and ticker:
 
     feats_sig = add_signal_columns(feats)
     latest_sig_row = feats_sig.iloc[-1]
-
-    with st.spinner("Đang lấy VN-Index để tính sức mạnh tương đối..."):
-        vnindex_df = fetch_vnindex(days_back)
 
     latest_rel_strength = None
     if vnindex_df is not None and not vnindex_df.empty:
@@ -449,6 +484,40 @@ if run and ticker:
                 )
     else:
         st.info("Không đủ dữ liệu để tính vùng giá quantile cho mã này.")
+
+    # -----------------------------------------------------------------
+    # VÙNG CẮT LỖ / CHỐT LỜI THAM KHẢO (dựa trên ATR)
+    # -----------------------------------------------------------------
+    st.divider()
+    st.subheader("🛡️ Vùng cắt lỗ / chốt lời tham khảo")
+    st.caption(
+        "Tính dựa trên biến động thực tế (ATR) của chính mã này, tỷ lệ rủi ro:lợi nhuận 1:2 — "
+        "đây là công cụ hỗ trợ QUẢN TRỊ RỦI RO, không phải điểm vào lệnh khuyến nghị. "
+        "Bạn nên tự điều chỉnh theo khẩu vị rủi ro và chiến lược riêng."
+    )
+
+    latest_atr_pct = float(latest_row["atr14"].iloc[0]) if not pd.isna(latest_row["atr14"].iloc[0]) else None
+
+    if latest_atr_pct:
+        rr_choice = st.select_slider(
+            "Tỷ lệ Risk:Reward mong muốn", options=["1:1", "1:1.5", "1:2", "1:3"], value="1:2",
+        )
+        rr_map = {"1:1": 1.0, "1:1.5": 1.5, "1:2": 2.0, "1:3": 3.0}
+        risk_levels = compute_risk_levels(
+            current_price=current_price, atr_pct=latest_atr_pct,
+            rr_ratio=rr_map[rr_choice], atr_multiplier=1.5,
+        )
+
+        rk1, rk2, rk3 = st.columns(3)
+        rk1.metric("Giá tham chiếu", f"{current_price:,.0f} đ")
+        rk2.metric("Cắt lỗ tham khảo", f"{risk_levels['stop_loss']:,.0f} đ", f"{risk_levels['stop_loss_pct']:.1f}%")
+        rk3.metric("Chốt lời tham khảo", f"{risk_levels['take_profit']:,.0f} đ", f"{risk_levels['take_profit_pct']:+.1f}%")
+        st.caption(
+            f"Khoảng cách cắt lỗ = 1.5× ATR({latest_atr_pct*100:.1f}% giá) · "
+            f"Chốt lời = khoảng cách cắt lỗ × {rr_map[rr_choice]:.1f}"
+        )
+    else:
+        st.info("Không đủ dữ liệu ATR để tính vùng cắt lỗ/chốt lời.")
 
     st.divider()
     st.subheader("Kiểm định backtest (walk-forward)")
