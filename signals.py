@@ -157,3 +157,27 @@ def composite_signal(ml_prob_1: float, latest_vol_spike: bool, latest_rel_streng
         "votes_bull": votes_bull, "votes_bear": votes_bear,
         "verdict": verdict, "details": details,
     }
+
+
+# ---------------------------------------------------------------------------
+# VÙNG CẮT LỖ / CHỐT LỜI THAM KHẢO (dựa trên ATR)
+# ---------------------------------------------------------------------------
+
+def compute_risk_levels(current_price: float, atr_pct: float, rr_ratio: float = 2.0, atr_multiplier: float = 1.5) -> dict:
+    """Tính vùng cắt lỗ/chốt lời THAM KHẢO dựa trên biến động thực tế (ATR) của mã,
+    không dựa trên cảm tính. atr_pct là ATR đã chuẩn hoá theo % giá (cột atr14 trong
+    features.py). Đây là công cụ hỗ trợ quản trị rủi ro, KHÔNG phải khuyến nghị vào lệnh.
+
+    Mặc định: khoảng cách cắt lỗ = 1.5x ATR, chốt lời = 2x khoảng cách cắt lỗ
+    (tỷ lệ risk:reward = 1:2, một quy tắc phổ biến trong quản trị vốn)."""
+    stop_distance_pct = atr_pct * atr_multiplier
+    stop_loss = current_price * (1 - stop_distance_pct)
+    take_profit = current_price * (1 + stop_distance_pct * rr_ratio)
+
+    return {
+        "stop_loss": stop_loss,
+        "take_profit": take_profit,
+        "stop_loss_pct": -stop_distance_pct * 100,
+        "take_profit_pct": stop_distance_pct * rr_ratio * 100,
+        "risk_reward_ratio": rr_ratio,
+    }
