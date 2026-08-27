@@ -1,605 +1,184 @@
 """
-App dự báo xác suất T+1 / T+3 cho cổ phiếu Việt Nam.
-Chạy: streamlit run app.py
+Tầng tín hiệu phát hiện sớm (signal detection) — kết hợp nhiều lớp tín hiệu
+ĐỘC LẬP với nhau, và kiểm định bằng event-study thay vì chỉ tin vào 1 model.
 
-Kiến trúc phân tầng:
-  vnstock/RSS (nguồn)  ->  fetch_history/fetch_all_news (kết nối)
-  ->  features.py (chuẩn hoá)  ->  models.py (nghiệp vụ)  ->  app.py (giao diện)
-
-LƯU Ý QUAN TRỌNG:
-- Đây là công cụ THAM KHẢO, không phải khuyến nghị đầu tư.
-- Xác suất/vùng giá phụ thuộc dữ liệu lịch sử, không phản ánh tin tức/sự kiện đột xuất.
-- Luôn đối chiếu phần Kiểm định backtest trước khi tin vào con số.
+Nguyên tắc: 1 tín hiệu đơn lẻ dễ nhiễu. Tín hiệu chỉ đáng chú ý khi NHIỀU lớp
+độc lập cùng đồng thuận. Đây KHÔNG phải khuyến nghị mua/bán — chỉ là công cụ
+tham khảo cá nhân, không thay thế phân tích của người có chứng chỉ hành nghề.
 """
 
-import warnings
-warnings.filterwarnings("ignore")
-
-import streamlit as st
-import pandas as pd
 import numpy as np
-from datetime import datetime, timedelta
-
-from news_utils import fetch_all_news, get_news_for_ticker, summarize_sentiment
-from features import build_features, FEATURE_COLS, FEATURE_LABELS
-from models import (
-    walk_forward_eval, confidence_label,
-    train_quantile_models, predict_price_range,
-    quick_train_predict,
-)
-from signals import (
-    add_signal_columns, event_study, compute_relative_strength,
-    composite_signal, compute_risk_levels,
-)
-from market_context import analyze_market_context, context_advisory_note
-
-st.set_page_config(page_title="Dự báo CK Việt Nam (tham khảo)", layout="wide")
-
-# ---------------------------------------------------------------------------
-# TẦNG KẾT NỐI — lấy dữ liệu thật
-# ---------------------------------------------------------------------------
-
-@st.cache_data(ttl=900, show_spinner=False)
-def fetch_news_cached() -> pd.DataFrame:
-    return fetch_all_news()
-
-
-@st.cache_data(ttl=3600, show_spinner=False)
-def fetch_history(ticker: str, days_back: int = 500) -> pd.DataFrame:
-    """API mới của vnstock (vnstock.api.quote.Quote). Tự xác thực VNSTOCK_API_KEY
-    nếu có trong secrets (tránh bị chặn 403). Thử lần lượt nhiều nguồn."""
-    from vnstock.api.quote import Quote
-
-    try:
-        if "VNSTOCK_API_KEY" in st.secrets:
-            import vnai
-            vnai.setup_api_key(st.secrets["VNSTOCK_API_KEY"])
-    except Exception:
-        pass
-
-    end = datetime.now().strftime("%Y-%m-%d")
-    start = (datetime.now() - timedelta(days=days_back)).strftime("%Y-%m-%d")
-
-    last_errors = {}
-    for source in ["VCI", "MSN", "KBS"]:
-        try:
-            q = Quote(symbol=ticker, source=source)
-            df = q.history(start=start, end=end, interval="1D")
-            if df is not None and not df.empty:
-                df = df.rename(columns={
-                    "time": "date", "open": "open", "high": "high",
-                    "low": "low", "close": "close", "volume": "volume",
-                })
-                df["date"] = pd.to_datetime(df["date"])
-                df = df.sort_values("date").reset_index(drop=True)
-                return df
-        except Exception as e:
-            last_errors[source] = str(e)
-            continue
-
-    detail = " | ".join(f"{src}: {msg}" for src, msg in last_errors.items())
-    raise ConnectionError(
-        f"Không lấy được dữ liệu cho mã {ticker}. Nếu lỗi có '403'/'Forbidden', "
-        f"cần đăng ký VNSTOCK_API_KEY tại vnstocks.com/login. Chi tiết: {detail}"
-    )
-
-
-@st.cache_data(ttl=3600, show_spinner=False)
-def fetch_vnindex(days_back: int = 500):
-    """Lấy dữ liệu VN-Index để tính sức mạnh tương đối. Trả về None nếu lỗi —
-    không nên làm sập cả app chỉ vì thiếu 1 lớp tín hiệu phụ."""
-    try:
-        return fetch_history("VNINDEX", days_back)
-    except Exception:
-        return None
+import pandas as pd
 
 
 # ---------------------------------------------------------------------------
-# GIAO DIỆN
+# LỚP 1+2: TÍN HIỆU QUY TẮC (rule-based) — dùng được cho event-study vì tính
+# nhanh trên toàn bộ lịch sử, không cần train lại model từng ngày
 # ---------------------------------------------------------------------------
 
-st.title("Dự báo xác suất T+1 / T+3 — Cổ phiếu Việt Nam")
-st.caption("Công cụ tham khảo · dữ liệu thật qua vnstock · không phải khuyến nghị đầu tư")
+def add_signal_columns(feats: pd.DataFrame) -> pd.DataFrame:
+    """Thêm cột tín hiệu tăng/giảm dạng quy tắc, dựa trên chỉ báo đã có sẵn
+    trong features.py. Dùng cho cả hiển thị hiện tại lẫn event-study lịch sử."""
+    d = feats.copy()
 
-st.warning(
-    "⚠️ Đây là công cụ **tham khảo**, không đảm bảo chính xác. Mô hình chỉ học từ dữ liệu "
-    "giá/khối lượng lịch sử — **không** biết trước tin tức, sự kiện doanh nghiệp, hay biến động "
-    "vĩ mô đột xuất. Luôn xem phần Kiểm định backtest trước khi diễn giải xác suất/vùng giá.",
-    icon="⚠️",
-)
+    rsi_prev = d["rsi14"].shift(1)
+    d["rsi_cross_up"] = (rsi_prev < 50) & (d["rsi14"] >= 50)
+    d["rsi_cross_down"] = (rsi_prev > 50) & (d["rsi14"] <= 50)
 
-try:
-    api_key_available = "ANTHROPIC_API_KEY" in st.secrets
-except Exception:
-    api_key_available = False
+    d["vol_spike"] = d["vol_ratio"] > 1.5  # khối lượng bất thường: >1.5x trung bình 20 phiên
 
-with st.sidebar:
-    st.header("Cấu hình")
-    ticker = st.text_input("Mã cổ phiếu (xem chi tiết)", value="VNM").strip().upper()
-    days_back = st.slider("Số ngày dữ liệu lịch sử", 250, 1000, 500, step=50)
-    run = st.button("Chạy dự báo chi tiết", type="primary", use_container_width=True)
-    st.divider()
-    st.subheader("Xếp hạng nhiều mã")
-    if st.button("Điền nhanh 15 mã đầu VN30", use_container_width=True):
-        st.session_state["tickers_raw_value"] = "ACB, BID, BSR, BVH, CTG, FPT, GAS, GVR, HDB, HPG, MBB, MSN, MWG, PLX, POW"
-    tickers_raw = st.text_area(
-        "Danh sách mã (cách nhau bởi dấu phẩy)",
-        value=st.session_state.get("tickers_raw_value", "VNM, VCB, HPG, FPT, VIC"),
-        height=80,
-        key="tickers_raw_value",
-    )
-    min_trade_value = st.slider(
-        "Lọc thanh khoản tối thiểu (tỷ đ/phiên)", 0.0, 10.0, 2.0, step=0.5,
-        help="Mã có giá trị giao dịch trung bình 20 phiên thấp hơn mức này sẽ bị loại khỏi bảng xếp hạng.",
-    )
-    screen_run = st.button("Xếp hạng danh mục", use_container_width=True)
+    # Tín hiệu tổng hợp quy tắc: RSI cắt lên 50 + khối lượng đột biến + xu hướng MA ủng hộ
+    d["signal_bull"] = d["rsi_cross_up"] & d["vol_spike"] & (d["ma_cross"] > 0)
+    d["signal_bear"] = d["rsi_cross_down"] & d["vol_spike"] & (d["ma_cross"] < 0)
 
-    st.divider()
-    st.caption("Phân tích sentiment tin tức")
-    use_claude_sentiment = st.toggle(
-        "Dùng Claude API (chính xác hơn, tốn phí nhỏ)",
-        value=False,
-        disabled=not api_key_available,
-        help="Cần cấu hình API key trong .streamlit/secrets.toml trước." if not api_key_available
-             else "Ước tính ~$1-2/tháng với mức dùng thông thường.",
-    )
-    if not api_key_available:
-        st.caption("⚠️ Chưa tìm thấy API key. Xem README để cấu hình.")
+    return d
+
+
+def event_study(feats: pd.DataFrame, signal_col: str, ret_col: str) -> dict:
+    """Kiểm định: mỗi lần tín hiệu xuất hiện trong quá khứ, giá thực tế biến
+    động ra sao so với baseline (tất cả các phiên)? Đây là cách trung thực để
+    biết tín hiệu có thật sự có 'edge' hay chỉ là trùng hợp."""
+    data = feats.dropna(subset=[signal_col, ret_col])
+    events = data[data[signal_col]]
+
+    if len(events) < 5:
+        return {"n_events": len(events), "insufficient": True}
+
+    event_mean = float(events[ret_col].mean())
+    event_pct_positive = float((events[ret_col] > 0).mean())
+
+    baseline_mean = float(data[ret_col].mean())
+    baseline_pct_positive = float((data[ret_col] > 0).mean())
+
+    return {
+        "n_events": len(events),
+        "insufficient": False,
+        "event_mean_return": event_mean,
+        "event_pct_positive": event_pct_positive,
+        "baseline_mean_return": baseline_mean,
+        "baseline_pct_positive": baseline_pct_positive,
+        "edge_return": event_mean - baseline_mean,
+        "edge_pct_positive": event_pct_positive - baseline_pct_positive,
+    }
 
 
 # ---------------------------------------------------------------------------
-# KẾT QUẢ QUÉT TỰ ĐỘNG — MÀN HÌNH CHÍNH (Giai đoạn 1: đẩy lên hàng đầu)
+# LỚP 3: SỨC MẠNH TƯƠNG ĐỐI so với VN-Index
 # ---------------------------------------------------------------------------
 
-import json as _json
-import os as _os
+def compute_relative_strength(stock_df: pd.DataFrame, index_df: pd.DataFrame, window: int = 20) -> pd.DataFrame:
+    """So sánh % thay đổi giá của mã với VN-Index cùng kỳ. Trả về DataFrame
+    có thêm cột 'rel_strength' (dương = mạnh hơn thị trường chung)."""
+    s = stock_df[["date", "close"]].rename(columns={"close": "stock_close"})
+    idx = index_df[["date", "close"]].rename(columns={"close": "index_close"})
+    merged = pd.merge(s, idx, on="date", how="inner")
 
-st.markdown("## 🌅 Bảng tin sáng nay — VN30")
+    stock_ret = merged["stock_close"].pct_change(window)
+    index_ret = merged["index_close"].pct_change(window)
+    merged["rel_strength"] = stock_ret - index_ret
 
-with st.spinner("Đang lấy bối cảnh thị trường chung (VN-Index)..."):
-    vnindex_top = fetch_vnindex(300)
-market_ctx = analyze_market_context(vnindex_top)
+    return merged[["date", "rel_strength"]]
 
-if market_ctx:
-    mc1, mc2, mc3 = st.columns(3)
-    mc1.metric("Xu hướng VN-Index", f"{market_ctx['trend_icon']} {market_ctx['trend']}")
-    mc2.metric("Mức biến động", f"{market_ctx['volatility_icon']} {market_ctx['volatility_level']}")
-    mc3.metric("VN-Index thay đổi 5 phiên", f"{market_ctx['change_5d_pct']:+.2f}%" if market_ctx['change_5d_pct'] is not None else "N/A")
-    st.caption(f"💡 {context_advisory_note(market_ctx)}")
-else:
-    st.caption("Không lấy được bối cảnh VN-Index — các tín hiệu bên dưới nên được đọc độc lập, thận trọng hơn.")
 
-st.divider()
+# ---------------------------------------------------------------------------
+# LỚP 4: TIN TỨC — quy đổi từ summarize_sentiment() đã có sẵn (news_utils.py)
+# ---------------------------------------------------------------------------
 
-if _os.path.exists("signals_latest.json"):
-    try:
-        with open("signals_latest.json", "r", encoding="utf-8") as f:
-            scan_data = _json.load(f)
-        st.caption(
-            f"Quét lúc: {scan_data['scanned_at']} · {len(scan_data['results'])} mã đạt tiêu chuẩn "
-            f"thanh khoản (trên tổng {len(scan_data.get('watchlist', []))} mã trong danh mục VN30)"
-        )
-        if scan_data["results"]:
-            scan_df = pd.DataFrame(scan_data["results"]).sort_values("probability_t1", ascending=False)
-            scan_df["probability_t1"] = scan_df["probability_t1"].apply(lambda x: f"{x*100:.0f}%")
-            scan_df["quick_accuracy"] = scan_df["quick_accuracy"].apply(lambda x: f"{x*100:.0f}%")
-            scan_df["volume_spike"] = scan_df["volume_spike"].apply(lambda x: "🟡 Có" if x else "⚪ Không")
-            scan_df["relative_strength"] = scan_df["relative_strength"].apply(
-                lambda x: f"{x*100:+.1f}%" if x is not None else "N/A"
-            )
-            if "avg_trade_value_bn" in scan_df.columns:
-                scan_df["avg_trade_value_bn"] = scan_df["avg_trade_value_bn"].apply(lambda x: f"{x:,.1f} tỷ")
-            scan_df = scan_df.rename(columns={
-                "ticker": "Mã", "price": "Giá", "change_pct": "% ngày",
-                "probability_t1": "Xác suất T+1", "quick_accuracy": "Acc nhanh",
-                "volume_spike": "KL bất thường", "relative_strength": "Mạnh/yếu vs VN-Index",
-                "avg_trade_value_bn": "GTGD TB/phiên",
-            })
-            st.dataframe(scan_df, hide_index=True, use_container_width=True)
-            st.caption(
-                "Đã tự động loại các mã có giá trị giao dịch trung bình dưới 2 tỷ đ/phiên "
-                "(thanh khoản quá thấp, tín hiệu kỹ thuật dễ bị nhiễu). "
-                "Đây là kết quả quét nhanh — bấm 'Chạy dự báo chi tiết' ở mã bạn quan tâm để xem đầy đủ "
-                "backtest, vùng giá, và kiểm định tín hiệu trước khi cân nhắc."
-            )
+def news_signal_direction(news_summary: dict) -> str:
+    """news_summary là kết quả từ summarize_sentiment() trong news_utils.py."""
+    if news_summary.get("n_news", 0) < 2:
+        return "Chưa đủ tin để đánh giá"
+    if news_summary["overall"] == "Nghiêng tích cực":
+        return "Tích cực"
+    if news_summary["overall"] == "Nghiêng tiêu cực":
+        return "Tiêu cực"
+    return "Trung lập"
+
+
+# ---------------------------------------------------------------------------
+# TỔNG HỢP 4 LỚP — chỉ gắn cờ "đáng chú ý" khi đa số đồng thuận
+# ---------------------------------------------------------------------------
+
+def composite_signal(ml_prob_1: float, latest_vol_spike: bool, latest_rel_strength, news_summary: dict) -> dict:
+    """Tổng hợp 4 lớp tín hiệu độc lập, đếm phiếu đồng thuận tăng/giảm.
+    latest_rel_strength có thể là None nếu không lấy được dữ liệu VN-Index."""
+    votes_bull, votes_bear = 0, 0
+    details = {}
+
+    # Lớp 1: mô hình ML (đã có từ walk_forward_eval)
+    if ml_prob_1 >= 0.55:
+        votes_bull += 1
+        details["Kỹ thuật (mô hình)"] = "🟢 Nghiêng tăng"
+    elif ml_prob_1 <= 0.45:
+        votes_bear += 1
+        details["Kỹ thuật (mô hình)"] = "🔴 Nghiêng giảm"
+    else:
+        details["Kỹ thuật (mô hình)"] = "⚪ Trung tính"
+
+    # Lớp 2: khối lượng bất thường (chỉ có ý nghĩa khi kết hợp chiều giá — ở đây
+    # dùng đơn giản: có spike hay không, chiều dựa vào các lớp khác)
+    if latest_vol_spike:
+        details["Khối lượng"] = "🟡 Bất thường (khuếch đại tín hiệu khác)"
+    else:
+        details["Khối lượng"] = "⚪ Bình thường"
+
+    # Lớp 3: sức mạnh tương đối vs VN-Index
+    if latest_rel_strength is not None:
+        if latest_rel_strength > 0.02:
+            votes_bull += 1
+            details["Sức mạnh tương đối"] = "🟢 Mạnh hơn VN-Index"
+        elif latest_rel_strength < -0.02:
+            votes_bear += 1
+            details["Sức mạnh tương đối"] = "🔴 Yếu hơn VN-Index"
         else:
-            st.info("Lần quét gần nhất không có mã nào đạt tiêu chuẩn thanh khoản.")
-    except Exception:
-        st.warning("File kết quả quét bị lỗi hoặc chưa đầy đủ. Thử chạy lại workflow trên GitHub Actions.")
-else:
-    st.info(
-        "**Chưa có kết quả quét tự động.** App đang ở chế độ chờ — bạn cần bật tính năng quét hằng ngày "
-        "qua GitHub Actions (xem mục 'Tự động quét mỗi sáng' trong README) để bảng này tự có dữ liệu mỗi "
-        "khi bạn mở app, không cần tự bấm nút. Trong lúc chờ, bạn vẫn dùng được phần 'Xếp hạng danh mục' "
-        "hoặc 'Chạy dự báo chi tiết' ở sidebar bên trái."
-    )
+            details["Sức mạnh tương đối"] = "⚪ Tương đương thị trường"
+    else:
+        details["Sức mạnh tương đối"] = "❓ Không lấy được dữ liệu VN-Index"
 
-st.divider()
+    # Lớp 4: tin tức
+    news_dir = news_signal_direction(news_summary)
+    if news_dir == "Tích cực":
+        votes_bull += 1
+        details["Tin tức"] = "🟢 Tích cực"
+    elif news_dir == "Tiêu cực":
+        votes_bear += 1
+        details["Tin tức"] = "🔴 Tiêu cực"
+    else:
+        details["Tin tức"] = f"⚪ {news_dir}"
+
+    if votes_bull >= 3:
+        verdict = "Nhiều tín hiệu đồng thuận TĂNG — đáng chú ý theo dõi thêm"
+    elif votes_bear >= 3:
+        verdict = "Nhiều tín hiệu đồng thuận GIẢM — đáng chú ý theo dõi thêm"
+    else:
+        verdict = "Tín hiệu chưa đủ đồng thuận — chưa có gì đặc biệt"
+
+    return {
+        "votes_bull": votes_bull, "votes_bear": votes_bear,
+        "verdict": verdict, "details": details,
+    }
 
 
 # ---------------------------------------------------------------------------
-# BẢNG XẾP HẠNG NHIỀU MÃ
+# VÙNG CẮT LỖ / CHỐT LỜI THAM KHẢO (dựa trên ATR)
 # ---------------------------------------------------------------------------
 
-if screen_run:
-    tickers_list = [t.strip().upper() for t in tickers_raw.split(",") if t.strip()]
-    if not tickers_list:
-        st.warning("Nhập ít nhất 1 mã để xếp hạng.")
-    elif len(tickers_list) > 15:
-        st.warning("Giới hạn tối đa 15 mã mỗi lần để tránh chờ quá lâu.")
-    else:
-        st.subheader("📊 Bảng xếp hạng xác suất tăng (tham khảo nhanh)")
-        st.caption(
-            "⚠️ Bảng này dùng kiểm định **nhanh** (1 lần chia train/test), KHÔNG phải "
-            "walk-forward đầy đủ như phần xem chi tiết 1 mã bên dưới. Dùng để rút gọn "
-            "danh sách cần xem kỹ, không phải căn cứ quyết định cuối cùng."
-        )
+def compute_risk_levels(current_price: float, atr_pct: float, rr_ratio: float = 2.0, atr_multiplier: float = 1.5) -> dict:
+    """Tính vùng cắt lỗ/chốt lời THAM KHẢO dựa trên biến động thực tế (ATR) của mã,
+    không dựa trên cảm tính. atr_pct là ATR đã chuẩn hoá theo % giá (cột atr14 trong
+    features.py). Đây là công cụ hỗ trợ quản trị rủi ro, KHÔNG phải khuyến nghị vào lệnh.
 
-        progress = st.progress(0.0, text="Đang xử lý...")
-        vnindex_for_screen = fetch_vnindex(500)  # lấy 1 lần, dùng chung cho mọi mã trong danh mục
-        rows = []
-        for i, tk in enumerate(tickers_list):
-            progress.progress((i + 1) / len(tickers_list), text=f"Đang xử lý {tk}...")
-            try:
-                raw = fetch_history(tk, days_back=500)
-                if raw.empty or len(raw) < 200:
-                    continue
-                feats = build_features(raw)
-                r1 = quick_train_predict(feats, "target_1")
-                r3 = quick_train_predict(feats, "target_3")
-                if r1 is None or r3 is None:
-                    continue
-                last_price = raw["close"].iloc[-1]
-                chg = (raw["close"].iloc[-1] / raw["close"].iloc[-2] - 1) * 100
+    Mặc định: khoảng cách cắt lỗ = 1.5x ATR, chốt lời = 2x khoảng cách cắt lỗ
+    (tỷ lệ risk:reward = 1:2, một quy tắc phổ biến trong quản trị vốn)."""
+    stop_distance_pct = atr_pct * atr_multiplier
+    stop_loss = current_price * (1 - stop_distance_pct)
+    take_profit = current_price * (1 + stop_distance_pct * rr_ratio)
 
-                avg_trade_value_bn = float((raw["close"] * raw["volume"]).tail(20).mean()) / 1e9
-                if avg_trade_value_bn < min_trade_value:
-                    st.caption(f"Bỏ qua {tk}: thanh khoản {avg_trade_value_bn:.2f} tỷ đ/phiên, dưới ngưỡng lọc")
-                    continue
-
-                # Đếm nhanh số lớp đồng thuận (không tính lớp tin tức để giữ tốc độ)
-                feats_sig = add_signal_columns(feats)
-                latest_vol_spike = bool(feats_sig["vol_spike"].iloc[-1])
-                rel_strength_tk = None
-                if vnindex_for_screen is not None:
-                    rel_df_tk = compute_relative_strength(raw, vnindex_for_screen)
-                    if not rel_df_tk.dropna().empty:
-                        rel_strength_tk = float(rel_df_tk["rel_strength"].dropna().iloc[-1])
-
-                votes = 0
-                if r1["probability"] >= 0.55:
-                    votes += 1
-                if rel_strength_tk is not None and rel_strength_tk > 0.02:
-                    votes += 1
-
-                rows.append({
-                    "Mã": tk, "Giá": f"{last_price:,.0f}", "% ngày": f"{chg:+.2f}%",
-                    "Xác suất tăng T+1": r1["probability"],
-                    "Xác suất tăng T+3": r3["probability"],
-                    "Acc nhanh T+1": r1["quick_accuracy"],
-                    "Khối lượng bất thường": "🟡 Có" if latest_vol_spike else "⚪ Không",
-                    "GTGD TB/phiên": f"{avg_trade_value_bn:,.1f} tỷ",
-                    "Tín hiệu đồng thuận (tối đa 2)": votes,
-                })
-            except Exception as e:
-                st.caption(f"Bỏ qua {tk}: {e}")
-                continue
-        progress.empty()
-
-        if rows:
-            rank_df = pd.DataFrame(rows).sort_values(
-                ["Tín hiệu đồng thuận (tối đa 2)", "Xác suất tăng T+1"], ascending=False
-            )
-            display_df = rank_df.copy()
-            display_df["Xác suất tăng T+1"] = display_df["Xác suất tăng T+1"].apply(lambda x: f"{x*100:.0f}%")
-            display_df["Xác suất tăng T+3"] = display_df["Xác suất tăng T+3"].apply(lambda x: f"{x*100:.0f}%")
-            display_df["Acc nhanh T+1"] = display_df["Acc nhanh T+1"].apply(lambda x: f"{x*100:.0f}%")
-            st.dataframe(display_df, hide_index=True, use_container_width=True)
-            st.caption(
-                "Cột 'Tín hiệu đồng thuận' đếm nhanh 2 lớp (mô hình + sức mạnh tương đối vs VN-Index), "
-                "chưa gồm tin tức để giữ tốc độ. Xem chi tiết đầy đủ 4 lớp ở phần 'Chạy dự báo chi tiết' bên dưới. "
-                "Mẹo: mã có 'Acc nhanh T+1' thấp gần 50% nghĩa là mô hình gần như đoán ngẫu nhiên "
-                "cho mã đó — xác suất tăng của nó kém tin cậy hơn, dù con số có thể cao."
-            )
-        else:
-            st.error("Không lấy được dữ liệu cho mã nào trong danh sách.")
-
-    st.divider()
-
-
-# ---------------------------------------------------------------------------
-# XEM CHI TIẾT 1 MÃ
-# ---------------------------------------------------------------------------
-
-if run and ticker:
-    with st.spinner(f"Đang lấy dữ liệu {ticker}..."):
-        try:
-            raw = fetch_history(ticker, days_back)
-        except Exception as e:
-            st.error(f"Không lấy được dữ liệu cho {ticker}. Lỗi: {e}")
-            st.stop()
-
-    if raw.empty or len(raw) < 200:
-        st.error("Không đủ dữ liệu lịch sử để huấn luyện mô hình (cần tối thiểu ~200 phiên).")
-        st.stop()
-
-    feats = build_features(raw)
-
-    col_price, col_info = st.columns([2, 1])
-    with col_price:
-        st.subheader(f"{ticker} — Diễn biến giá")
-        st.line_chart(raw.set_index("date")["close"])
-    with col_info:
-        last = raw.iloc[-1]
-        current_price = float(last["close"])
-        chg = (raw["close"].iloc[-1] / raw["close"].iloc[-2] - 1) * 100
-        st.metric("Giá đóng cửa gần nhất", f"{current_price:,.0f} đ", f"{chg:+.2f}%")
-        st.metric("Khối lượng phiên gần nhất", f"{last['volume']:,.0f}")
-
-    st.divider()
-    st.subheader("Xác suất dự báo (tham khảo)")
-
-    with st.spinner("Đang huấn luyện & kiểm định walk-forward (có thể mất 30-60 giây)..."):
-        res1 = walk_forward_eval(feats, "target_1")
-        res3 = walk_forward_eval(feats, "target_3")
-
-    if res1 is None or res3 is None:
-        st.error("Không đủ dữ liệu sạch để huấn luyện walk-forward. Thử tăng số ngày lịch sử.")
-        st.stop()
-
-    latest_row = feats.dropna(subset=FEATURE_COLS).iloc[[-1]]
-    prob1 = res1["model"].predict_proba(latest_row[FEATURE_COLS])[0][1]
-    prob3 = res3["model"].predict_proba(latest_row[FEATURE_COLS])[0][1]
-
-    c1, c2 = st.columns(2)
-    for col, label, prob, res in [(c1, "T+1 (phiên kế tiếp)", prob1, res1), (c2, "T+3 (3 phiên tới)", prob3, res3)]:
-        with col:
-            direction = "TĂNG" if prob >= 0.5 else "GIẢM"
-            conf = confidence_label(res["accuracy"], res["baseline_accuracy"])
-            st.markdown(f"**{label}**")
-            st.progress(float(prob) if prob >= 0.5 else float(1 - prob))
-            st.markdown(f"### {prob*100:.0f}% khả năng {direction}")
-            st.caption(f"Độ tin cậy dự báo: **{conf}** · (dựa trên chênh lệch accuracy mô hình vs baseline)")
-
-    # -----------------------------------------------------------------
-    # BỐI CẢNH THỊ TRƯỜNG CHUNG (VN-Index) — đọc trước khi xem tín hiệu riêng của mã
-    # -----------------------------------------------------------------
-    st.divider()
-    st.subheader("🌐 Bối cảnh thị trường chung")
-
-    with st.spinner("Đang lấy VN-Index..."):
-        vnindex_df = fetch_vnindex(days_back)
-
-    market_ctx_detail = analyze_market_context(vnindex_df)
-    if market_ctx_detail:
-        bc1, bc2, bc3 = st.columns(3)
-        bc1.metric("Xu hướng VN-Index", f"{market_ctx_detail['trend_icon']} {market_ctx_detail['trend']}")
-        bc2.metric("Mức biến động", f"{market_ctx_detail['volatility_icon']} {market_ctx_detail['volatility_level']}")
-        bc3.metric(
-            "VN-Index 5 phiên",
-            f"{market_ctx_detail['change_5d_pct']:+.2f}%" if market_ctx_detail['change_5d_pct'] is not None else "N/A",
-        )
-        st.caption(f"💡 {context_advisory_note(market_ctx_detail)}")
-    else:
-        st.caption("Không lấy được bối cảnh VN-Index.")
-
-    # -----------------------------------------------------------------
-    # TÍN HIỆU PHÁT HIỆN SỚM — tổng hợp 4 lớp độc lập
-    # -----------------------------------------------------------------
-    st.divider()
-    st.subheader("🔎 Tín hiệu phát hiện sớm (tổng hợp nhiều lớp)")
-    st.caption(
-        "Đây KHÔNG phải khuyến nghị mua/bán. Chỉ là tổng hợp nhiều góc nhìn độc lập "
-        "để bạn tự đánh giá — công cụ tham khảo cá nhân, không thay thế phân tích "
-        "của người có chứng chỉ hành nghề chứng khoán."
-    )
-
-    feats_sig = add_signal_columns(feats)
-    latest_sig_row = feats_sig.iloc[-1]
-
-    latest_rel_strength = None
-    if vnindex_df is not None and not vnindex_df.empty:
-        rel_df = compute_relative_strength(raw, vnindex_df)
-        if not rel_df.dropna().empty:
-            latest_rel_strength = float(rel_df["rel_strength"].dropna().iloc[-1])
-
-    # Tái sử dụng tin tức đã lấy (tính trước ở đây, phần hiển thị đầy đủ ở dưới)
-    try:
-        news_df_for_signal = fetch_news_cached()
-        ticker_news_for_signal = get_news_for_ticker(ticker, news_df_for_signal)
-        news_summary_for_signal = summarize_sentiment(ticker_news_for_signal)
-    except Exception:
-        news_summary_for_signal = {"n_news": 0, "overall": "Chưa có tin"}
-
-    combo = composite_signal(
-        ml_prob_1=float(prob1),
-        latest_vol_spike=bool(latest_sig_row["vol_spike"]),
-        latest_rel_strength=latest_rel_strength,
-        news_summary=news_summary_for_signal,
-    )
-
-    sig_cols = st.columns(4)
-    for (label, value), col in zip(combo["details"].items(), sig_cols):
-        with col:
-            st.markdown(f"**{label}**")
-            st.markdown(value)
-
-    st.markdown(f"### {combo['verdict']}")
-    st.caption(f"Phiếu đồng thuận: {combo['votes_bull']} tăng · {combo['votes_bear']} giảm (trên tối đa 3 lớp có phiếu)")
-
-    with st.expander("📈 Kiểm định tín hiệu quy tắc bằng dữ liệu lịch sử (event-study)"):
-        st.caption(
-            "Tín hiệu quy tắc: RSI cắt lên/xuống mốc 50 + khối lượng đột biến (>1.5x TB20) "
-            "+ xu hướng MA ủng hộ. Đây là tín hiệu ĐƠN GIẢN HƠN mô hình ML ở trên, nhưng "
-            "kiểm định được trên toàn bộ lịch sử để biết có thật sự có 'edge' hay không."
-        )
-        es_bull = event_study(feats_sig, "signal_bull", "fut_ret_1")
-        es_bear = event_study(feats_sig, "signal_bear", "fut_ret_1")
-
-        for name, es in [("Tín hiệu TĂNG (rule-based)", es_bull), ("Tín hiệu GIẢM (rule-based)", es_bear)]:
-            st.markdown(f"**{name}**")
-            if es.get("insufficient"):
-                st.write(f"Chỉ có {es['n_events']} lần xuất hiện trong lịch sử — chưa đủ để kết luận đáng tin cậy.")
-            else:
-                st.write(
-                    f"Xuất hiện {es['n_events']} lần trong quá khứ. Khi tín hiệu này xảy ra, "
-                    f"lợi nhuận T+1 trung bình là **{es['event_mean_return']*100:+.2f}%** "
-                    f"(so với baseline mọi phiên: {es['baseline_mean_return']*100:+.2f}%) — "
-                    f"chênh lệch **{es['edge_return']*100:+.2f}pp**. "
-                    f"Tỷ lệ tăng giá sau tín hiệu: {es['event_pct_positive']*100:.0f}% "
-                    f"(baseline: {es['baseline_pct_positive']*100:.0f}%)."
-                )
-                if abs(es['edge_return']) < 0.002:
-                    st.caption("⚠️ Chênh lệch quá nhỏ — tín hiệu này có thể không có edge thật sự với mã này.")
-
-    # -----------------------------------------------------------------
-    # VÙNG GIÁ DỰ BÁO (quantile regression)
-    # -----------------------------------------------------------------
-    st.divider()
-    st.subheader("Vùng giá dự báo (tham khảo)")
-    st.caption(
-        "Khoảng giá phản ánh **đúng mức biến động thực tế** của mã trong quá khứ — "
-        "có thể rộng, đây không phải lỗi mà là bản chất của dự báo ngắn hạn. "
-        "Khoảng hẹp giả tạo sẽ gây hiểu lầm nguy hiểm hơn khoảng rộng trung thực."
-    )
-
-    with st.spinner("Đang tính vùng giá..."):
-        qmodels_1 = train_quantile_models(feats, "fut_ret_1")
-        qmodels_3 = train_quantile_models(feats, "fut_ret_3")
-
-    if qmodels_1 and qmodels_3:
-        range1 = predict_price_range(qmodels_1, latest_row, current_price)
-        range3 = predict_price_range(qmodels_3, latest_row, current_price)
-
-        rc1, rc2 = st.columns(2)
-        for col, label, rg in [(rc1, "T+1", range1), (rc2, "T+3", range3)]:
-            with col:
-                st.markdown(f"**Vùng giá {label}**")
-                st.markdown(
-                    f"### {rg['lo_price']:,.0f} — {rg['hi_price']:,.0f} đ"
-                )
-                st.caption(
-                    f"Trung vị: {rg['mid_price']:,.0f}đ ({rg['mid_pct']:+.1f}%) · "
-                    f"Khoảng 10%-90% phân vị lịch sử"
-                )
-    else:
-        st.info("Không đủ dữ liệu để tính vùng giá quantile cho mã này.")
-
-    # -----------------------------------------------------------------
-    # VÙNG CẮT LỖ / CHỐT LỜI THAM KHẢO (dựa trên ATR)
-    # -----------------------------------------------------------------
-    st.divider()
-    st.subheader("🛡️ Vùng cắt lỗ / chốt lời tham khảo")
-    st.caption(
-        "Tính dựa trên biến động thực tế (ATR) của chính mã này, tỷ lệ rủi ro:lợi nhuận 1:2 — "
-        "đây là công cụ hỗ trợ QUẢN TRỊ RỦI RO, không phải điểm vào lệnh khuyến nghị. "
-        "Bạn nên tự điều chỉnh theo khẩu vị rủi ro và chiến lược riêng."
-    )
-
-    latest_atr_pct = float(latest_row["atr14"].iloc[0]) if not pd.isna(latest_row["atr14"].iloc[0]) else None
-
-    if latest_atr_pct:
-        rr_choice = st.select_slider(
-            "Tỷ lệ Risk:Reward mong muốn", options=["1:1", "1:1.5", "1:2", "1:3"], value="1:2",
-        )
-        rr_map = {"1:1": 1.0, "1:1.5": 1.5, "1:2": 2.0, "1:3": 3.0}
-        risk_levels = compute_risk_levels(
-            current_price=current_price, atr_pct=latest_atr_pct,
-            rr_ratio=rr_map[rr_choice], atr_multiplier=1.5,
-        )
-
-        rk1, rk2, rk3 = st.columns(3)
-        rk1.metric("Giá tham chiếu", f"{current_price:,.0f} đ")
-        rk2.metric("Cắt lỗ tham khảo", f"{risk_levels['stop_loss']:,.0f} đ", f"{risk_levels['stop_loss_pct']:.1f}%")
-        rk3.metric("Chốt lời tham khảo", f"{risk_levels['take_profit']:,.0f} đ", f"{risk_levels['take_profit_pct']:+.1f}%")
-        st.caption(
-            f"Khoảng cách cắt lỗ = 1.5× ATR({latest_atr_pct*100:.1f}% giá) · "
-            f"Chốt lời = khoảng cách cắt lỗ × {rr_map[rr_choice]:.1f}"
-        )
-    else:
-        st.info("Không đủ dữ liệu ATR để tính vùng cắt lỗ/chốt lời.")
-
-    st.divider()
-    st.subheader("Kiểm định backtest (walk-forward)")
-    st.caption("So sánh độ chính xác mô hình với baseline đơn giản (đoán lặp lại xu hướng phiên trước). "
-               "Nếu mô hình không vượt baseline rõ rệt, độ tin cậy dự báo ở trên nên coi là thấp.")
-
-    bt_df = pd.DataFrame({
-        "Mốc": ["T+1", "T+3"],
-        "Độ chính xác mô hình": [f"{res1['accuracy']*100:.1f}%", f"{res3['accuracy']*100:.1f}%"],
-        "Baseline (xu hướng trước)": [f"{res1['baseline_accuracy']*100:.1f}%", f"{res3['baseline_accuracy']*100:.1f}%"],
-        "Chênh lệch": [f"{(res1['accuracy']-res1['baseline_accuracy'])*100:+.1f}pp",
-                       f"{(res3['accuracy']-res3['baseline_accuracy'])*100:+.1f}pp"],
-        "Số phiên kiểm định": [res1["n_test"], res3["n_test"]],
-    })
-    st.dataframe(bt_df, hide_index=True, use_container_width=True)
-
-    st.divider()
-    st.subheader("Yếu tố ảnh hưởng đến dự báo T+1")
-    importances = pd.Series(res1["model"].feature_importances_, index=FEATURE_COLS)
-    importances = importances / importances.sum()
-    imp_df = pd.DataFrame({
-        "Yếu tố": [FEATURE_LABELS[c] for c in importances.index],
-        "Mức ảnh hưởng": importances.values,
-    }).sort_values("Mức ảnh hưởng", ascending=True)
-    st.bar_chart(imp_df.set_index("Yếu tố"))
-
-    st.info(
-        "Mô hình **không** đưa các yếu tố tin tức, công bố thông tin doanh nghiệp, hay biến động "
-        "vĩ mô bất ngờ vào tính toán. Nếu có sự kiện lớn sắp diễn ra (họp ĐHCĐ, công bố KQKD, tin vĩ mô), "
-        "xác suất/vùng giá ở trên nên được xem xét thận trọng hơn.",
-        icon="ℹ️",
-    )
-
-    # -----------------------------------------------------------------
-    # PANEL TIN TỨC
-    # -----------------------------------------------------------------
-    st.divider()
-    st.subheader("📰 Tin tức liên quan (tham khảo — chưa đưa vào mô hình)")
-    st.caption(
-        "Sentiment tính bằng đếm từ khoá tích cực/tiêu cực (miễn phí, offline), "
-        "**không hiểu ngữ cảnh/phủ định** — chỉ mang tính gợi ý sơ bộ, bạn nên tự đọc "
-        "để đối chiếu với dự báo mô hình ở trên."
-    )
-
-    with st.spinner("Đang lấy tin tức mới nhất..."):
-        try:
-            news_df = fetch_news_cached()
-        except Exception as e:
-            news_df = pd.DataFrame()
-            st.warning(f"Không lấy được tin tức lúc này. Lỗi: {e}")
-
-    if not news_df.empty:
-        claude_client = None
-        if use_claude_sentiment and api_key_available:
-            import anthropic
-            claude_client = anthropic.Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
-
-        ticker_news = get_news_for_ticker(ticker, news_df, use_claude=use_claude_sentiment, claude_client=claude_client)
-        summary = summarize_sentiment(ticker_news)
-
-        if summary["n_news"] == 0:
-            st.write(f"Không tìm thấy tin nào nhắc trực tiếp đến **{ticker}** trong các nguồn RSS hiện tại.")
-        else:
-            c1, c2, c3, c4 = st.columns(4)
-            c1.metric("Tổng số tin", summary["n_news"])
-            c2.metric("Tích cực", summary["n_pos"])
-            c3.metric("Tiêu cực", summary["n_neg"])
-            c4.metric("Xu hướng chung", summary["overall"])
-
-            for _, row in ticker_news.iterrows():
-                icon = {"Tích cực": "🟢", "Tiêu cực": "🔴", "Trung lập": "⚪"}[row["sentiment_label"]]
-                with st.expander(f"{icon} {row['title']}"):
-                    st.write(row["summary"] if row["summary"] else "_Không có tóm tắt._")
-                    st.caption(f"Nguồn: {row['source']} · {row['published']}")
-                    if row.get("reason"):
-                        st.caption(f"Nhận định: {row['reason']}")
-                    if row["matched_words"]:
-                        st.caption(f"Từ khoá khớp: {', '.join(row['matched_words'])}")
-                    st.link_button("Đọc bài gốc", row["link"])
-    else:
-        st.write("Chưa có dữ liệu tin tức để hiển thị.")
-
-elif not screen_run:
-    st.info("Nhập mã cổ phiếu ở thanh bên trái và bấm **Chạy dự báo chi tiết**, "
-            "hoặc dùng **Xếp hạng danh mục** để lọc nhanh nhiều mã cùng lúc.")
+    return {
+        "stop_loss": stop_loss,
+        "take_profit": take_profit,
+        "stop_loss_pct": -stop_distance_pct * 100,
+        "take_profit_pct": stop_distance_pct * rr_ratio * 100,
+        "risk_reward_ratio": rr_ratio,
+    }
+  
