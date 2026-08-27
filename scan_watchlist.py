@@ -18,8 +18,14 @@ from features import build_features
 from models import quick_train_predict
 from signals import add_signal_columns, compute_relative_strength
 
-# Danh mục mặc định — sửa trực tiếp tại đây hoặc truyền qua biến môi trường WATCHLIST
-DEFAULT_WATCHLIST = ["VNM", "VCB", "HPG", "FPT", "VIC", "VHM", "MSN", "MWG", "TCB", "GAS"]
+# Danh mục mặc định — VN30 (kỳ cơ cấu tháng 7/2026 của HOSE), sửa qua biến môi trường WATCHLIST nếu muốn khác
+DEFAULT_WATCHLIST = [
+    "ACB", "BID", "BSR", "BVH", "CTG", "FPT", "GAS", "GVR", "HDB", "HPG",
+    "MBB", "MSN", "MWG", "PLX", "POW", "SAB", "SSB", "SSI", "STB", "TCB",
+    "TPB", "VCB", "VHM", "VIB", "VIC", "VJC", "VNM", "VPB", "VPL", "VRE",
+]
+
+MIN_AVG_TRADE_VALUE = float(os.environ.get("MIN_AVG_TRADE_VALUE", 2_000_000_000))  # 2 tỷ đ/phiên mặc định
 
 
 def fetch_history_standalone(ticker: str, days_back: int = 500):
@@ -72,6 +78,11 @@ def main():
             if r1 is None:
                 continue
 
+            avg_trade_value = float((raw["close"] * raw["volume"]).tail(20).mean())
+            if avg_trade_value < MIN_AVG_TRADE_VALUE:
+                print(f"  {tk}: bỏ qua — thanh khoản thấp (TB {avg_trade_value/1e9:.2f} tỷ đ/phiên)")
+                continue
+
             rel_strength = None
             if vnindex_df is not None:
                 rel_df = compute_relative_strength(raw, vnindex_df)
@@ -86,6 +97,7 @@ def main():
                 "quick_accuracy": r1["quick_accuracy"],
                 "volume_spike": bool(feats_sig["vol_spike"].iloc[-1]),
                 "relative_strength": rel_strength,
+                "avg_trade_value_bn": round(avg_trade_value / 1e9, 2),
             })
             print(f"  {tk}: xác suất T+1 = {r1['probability']*100:.0f}%")
         except Exception as e:
