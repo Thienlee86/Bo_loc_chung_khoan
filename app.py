@@ -33,6 +33,8 @@ from signals import (
     composite_signal, compute_risk_levels,
 )
 from market_context import analyze_market_context, context_advisory_note
+from sector_analysis import sector_for_ticker
+from trade_plan import build_trade_plan, calculate_position_size
 
 st.set_page_config(page_title="Dự báo CK Việt Nam (tham khảo)", layout="wide")
 
@@ -253,11 +255,26 @@ if _os.path.exists("signals_latest.json"):
             )
             if "avg_trade_value_bn" in scan_df.columns:
                 scan_df["avg_trade_value_bn"] = scan_df["avg_trade_value_bn"].apply(lambda x: f"{x:,.1f} tỷ")
+            scan_df["trade_action"] = scan_df["trade_plan"].apply(
+                lambda plan: plan.get("action", "Chưa có") if isinstance(plan, dict) else "Chưa có"
+            )
+            scan_df["entry_zone"] = scan_df["trade_plan"].apply(
+                lambda plan: f"{plan['entry_low']:,.0f}–{plan['entry_high']:,.0f}" if isinstance(plan, dict) else "N/A"
+            )
+            scan_df["stop_level"] = scan_df["trade_plan"].apply(
+                lambda plan: f"{plan['stop_loss']:,.0f}" if isinstance(plan, dict) else "N/A"
+            )
+            scan_df["tp2_level"] = scan_df["trade_plan"].apply(
+                lambda plan: f"{plan['tp2']:,.0f}" if isinstance(plan, dict) else "N/A"
+            )
+            scan_df = scan_df.drop(columns=["trade_plan"], errors="ignore")
             scan_df = scan_df.rename(columns={
                 "ticker": "Mã", "price": "Giá", "change_pct": "% ngày",
                 "probability_t1": "Xác suất T+1", "quick_accuracy": "Acc nhanh",
                 "volume_spike": "KL bất thường", "relative_strength": "Mạnh/yếu vs VN-Index",
-                "avg_trade_value_bn": "GTGD TB/phiên",
+                "avg_trade_value_bn": "GTGD TB/phiên", "sector": "Ngành",
+                "sector_score": "Điểm ngành", "trade_action": "Trạng thái",
+                "entry_zone": "Vùng mua", "stop_level": "Cắt lỗ", "tp2_level": "TP2",
             })
             st.dataframe(scan_df, hide_index=True, use_container_width=True)
             st.caption(
@@ -550,38 +567,89 @@ if run and ticker:
         st.info("Không đủ dữ liệu để tính vùng giá quantile cho mã này.")
 
     # -----------------------------------------------------------------
-    # VÙNG CẮT LỖ / CHỐT LỜI THAM KHẢO (dựa trên ATR)
+    # KẾ HOẠCH GIAO DỊCH VÀ QUẢN TRỊ VỐN
     # -----------------------------------------------------------------
     st.divider()
-    st.subheader("🛡️ Vùng cắt lỗ / chốt lời tham khảo")
+    st.subheader("🛡️ Kế hoạch giao dịch tham khảo")
     st.caption(
-        "Tính dựa trên biến động thực tế (ATR) của chính mã này, tỷ lệ rủi ro:lợi nhuận 1:2 — "
-        "đây là công cụ hỗ trợ QUẢN TRỊ RỦI RO, không phải điểm vào lệnh khuyến nghị. "
-        "Bạn nên tự điều chỉnh theo khẩu vị rủi ro và chiến lược riêng."
+        "Vùng mua dựa trên EMA20/hỗ trợ hoặc breakout; stop là điểm vô hiệu kỹ thuật. "
+        "App tự cảnh báo mua đuổi và dùng tỷ lệ rủi ro:lợi nhuận 1:1 tại TP1, 1:2 tại TP2."
     )
 
-    latest_atr_pct = float(latest_row["atr14"].iloc[0]) if not pd.isna(latest_row["atr14"].iloc[0]) else None
-
-    if latest_atr_pct:
-        rr_choice = st.select_slider(
-            "Tỷ lệ Risk:Reward mong muốn", options=["1:1", "1:1.5", "1:2", "1:3"], value="1:2",
+    detail_sector_score = None
+    try:
+        with open("signals_latest.json", "r", encoding="utf-8") as score_file:
+            saved_scan = _json.load(score_file)
+        detail_sector = sector_for_ticker(ticker)
+        detail_sector_score = next(
+            (row["score"] for row in saved_scan.get("sector_rankings", [])
+             if row.get("sector") == detail_sector),
+            None,
         )
-        rr_map = {"1:1": 1.0, "1:1.5": 1.5, "1:2": 2.0, "1:3": 3.0}
-        risk_levels = compute_risk_levels(
-            current_price=current_price, atr_pct=latest_atr_pct,
-            rr_ratio=rr_map[rr_choice], atr_multiplier=1.5,
-        )
+    except Exception:
+        detail_sector = sector_for_ticker(ticker)
 
-        rk1, rk2, rk3 = st.columns(3)
-        rk1.metric("Giá tham chiếu", f"{current_price:,.0f} đ")
-        rk2.metric("Cắt lỗ tham khảo", f"{risk_levels['stop_loss']:,.0f} đ", f"{risk_levels['stop_loss_pct']:.1f}%")
-        rk3.metric("Chốt lời tham khảo", f"{risk_levels['take_profit']:,.0f} đ", f"{risk_levels['take_profit_pct']:+.1f}%")
+    plan = build_trade_plan(
+        raw,
+        sector_score=detail_sector_score,
+        market_trend=market_ctx_detail.get("trend") if market_ctx_detail else None,
+    )
+
+    if plan:
+        action_colors = {
+            "MUA THĂM DÒ": "green", "KHÔNG MUA": "red",
+            "KHÔNG MUA ĐUỔI": "orange", "CHỜ XÁC NHẬN": "orange",
+        }
+        color = action_colors.get(plan["action"], "blue")
+        st.markdown(f"### :{color}[{plan['action']}]")
+        st.write(f"**Thiết lập:** {plan['setup']} · {plan['reason']}")
+        if detail_sector_score is not None:
+            st.caption(f"Ngành {detail_sector}: {detail_sector_score:.1f}/100")
+
+        pc1, pc2, pc3, pc4 = st.columns(4)
+        pc1.metric("Vùng mua thấp", f"{plan['entry_low']:,.0f} đ")
+        pc2.metric("Vùng mua cao", f"{plan['entry_high']:,.0f} đ")
+        pc3.metric("Cắt lỗ", f"{plan['stop_loss']:,.0f} đ", f"-{plan['risk_pct']:.1f}% từ giá mua chuẩn")
+        pc4.metric("ATR hiện tại", f"{plan['atr_pct']:.1f}%")
+
+        tc1, tc2, tc3 = st.columns(3)
+        tc1.metric("TP1 – chốt 30–40%", f"{plan['tp1']:,.0f} đ", "+1R")
+        tc2.metric("TP2 – chốt thêm", f"{plan['tp2']:,.0f} đ", "+2R")
+        tc3.metric("Trailing stop tham khảo", f"{plan['trailing_stop']:,.0f} đ")
+
+        with st.expander("Tính số lượng mua theo tổng vốn"):
+            capital = st.number_input(
+                "Tổng vốn tài khoản (đồng)", min_value=10_000_000,
+                value=100_000_000, step=10_000_000,
+            )
+            risk_percent = st.select_slider(
+                "Mức rủi ro tối đa mỗi lệnh", options=[0.5, 0.75, 1.0, 1.5, 2.0], value=1.0,
+                format_func=lambda value: f"{value}%",
+            )
+            max_position_percent = st.slider(
+                "Tỷ trọng tối đa cho một mã", 5, 30, 15, step=5,
+            )
+            position = calculate_position_size(
+                capital=float(capital), entry_price=plan["entry_reference"],
+                stop_loss=plan["stop_loss"], risk_percent=float(risk_percent),
+                max_position_percent=float(max_position_percent),
+            )
+            if position["quantity"] > 0:
+                st.metric("Khối lượng tối đa tham khảo", f"{position['quantity']:,} cổ phiếu")
+                st.caption(
+                    f"Giá trị vị thế khoảng {position['position_value']:,.0f}đ · "
+                    f"Vốn chịu rủi ro nếu chạm stop khoảng {position['capital_at_risk']:,.0f}đ · "
+                    f"Giới hạn bởi: {position['limited_by']}."
+                )
+            else:
+                st.warning("Quy mô vốn/rủi ro hiện tại chưa đủ mua một lô 100 cổ phiếu trong giới hạn đã chọn.")
+
         st.caption(
-            f"Khoảng cách cắt lỗ = 1.5× ATR({latest_atr_pct*100:.1f}% giá) · "
-            f"Chốt lời = khoảng cách cắt lỗ × {rr_map[rr_choice]:.1f}"
+            f"Cơ sở stop: {plan['stop_basis']}. Nếu luận điểm ngành hoặc thị trường xấu đi, "
+            "cần đánh giá thoát sớm thay vì chờ máy móc đến đúng mức stop."
         )
     else:
-        st.info("Không đủ dữ liệu ATR để tính vùng cắt lỗ/chốt lời.")
+        st.info("Không đủ dữ liệu để lập kế hoạch giao dịch cho mã này.")
 
     st.divider()
     st.subheader("Kiểm định backtest (walk-forward)")
