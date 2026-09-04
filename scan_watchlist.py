@@ -17,6 +17,7 @@ import pandas as pd
 from features import build_features
 from models import quick_train_predict
 from signals import add_signal_columns, compute_relative_strength
+from sector_analysis import attach_score_changes, calculate_sector_rankings
 
 # Danh mục mặc định — VN30 (kỳ cơ cấu tháng 7/2026 của HOSE), sửa qua biến môi trường WATCHLIST nếu muốn khác
 DEFAULT_WATCHLIST = [
@@ -64,7 +65,15 @@ def main():
     print(f"Đang quét {len(watchlist)} mã: {watchlist}")
     vnindex_df = fetch_history_standalone("VNINDEX", 500)
 
+    previous_sector_rankings = []
+    try:
+        with open("signals_latest.json", "r", encoding="utf-8") as old_file:
+            previous_sector_rankings = json.load(old_file).get("sector_rankings", [])
+    except (FileNotFoundError, json.JSONDecodeError):
+        pass
+
     results = []
+    histories = {}
     for tk in watchlist:
         try:
             raw = fetch_history_standalone(tk, 500)
@@ -72,6 +81,7 @@ def main():
                 print(f"  {tk}: không đủ dữ liệu, bỏ qua")
                 continue
 
+            histories[tk] = raw
             feats = build_features(raw)
             feats_sig = add_signal_columns(feats)
             r1 = quick_train_predict(feats, "target_1")
@@ -104,16 +114,23 @@ def main():
             print(f"  {tk}: lỗi — {e}")
             continue
 
+    sector_rankings = attach_score_changes(
+        calculate_sector_rankings(histories, vnindex_df),
+        previous_sector_rankings,
+    )
+
     output = {
+        "schema_version": 2,
         "scanned_at": datetime.now().isoformat(),
         "watchlist": watchlist,
         "results": results,
+        "sector_rankings": sector_rankings,
     }
 
     with open("signals_latest.json", "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
 
-    print(f"Đã lưu kết quả vào signals_latest.json ({len(results)}/{len(watchlist)} mã thành công)")
+    print(f"Đã lưu kết quả vào signals_latest.json ({len(results)}/{len(watchlist)} mã thành công, {len(sector_rankings)} nhóm ngành)")
 
 
 if __name__ == "__main__":

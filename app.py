@@ -193,6 +193,49 @@ if _os.path.exists("signals_latest.json"):
             f"Quét lúc: {scan_data['scanned_at']} · {len(scan_data['results'])} mã đạt tiêu chuẩn "
             f"thanh khoản (trên tổng {len(scan_data.get('watchlist', []))} mã trong danh mục VN30)"
         )
+
+        sector_rows = scan_data.get("sector_rankings", [])
+        if sector_rows:
+            st.markdown("### 🧭 Sức mạnh nhóm ngành")
+            status_icons = {
+                "Dẫn dắt mạnh": "🟢", "Đang cải thiện": "🔵",
+                "Trung tính / tích lũy": "⚪", "Suy yếu": "🟡",
+                "Điều chỉnh mạnh": "🔴",
+            }
+            sector_df = pd.DataFrame(sector_rows)
+            sector_df["status"] = sector_df["status"].apply(
+                lambda value: f"{status_icons.get(value, '⚪')} {value}"
+            )
+            sector_df["score_change"] = sector_df["score_change"].apply(
+                lambda value: "Mới" if pd.isna(value) else f"{value:+.1f}"
+            )
+            sector_df["return_5d_pct"] = sector_df["return_5d_pct"].apply(lambda value: f"{value:+.1f}%")
+            sector_df["relative_strength_20d_pct"] = sector_df["relative_strength_20d_pct"].apply(
+                lambda value: f"{value:+.1f}%"
+            )
+            sector_df["breadth_ma20_pct"] = sector_df["breadth_ma20_pct"].apply(lambda value: f"{value:.0f}%")
+            sector_df["volume_ratio"] = sector_df["volume_ratio"].apply(lambda value: f"{value:.2f}x")
+            sector_df = sector_df[[
+                "sector", "score", "score_change", "status", "return_5d_pct",
+                "relative_strength_20d_pct", "breadth_ma20_pct", "volume_ratio",
+            ]].rename(columns={
+                "sector": "Nhóm ngành", "score": "Điểm", "score_change": "Thay đổi",
+                "status": "Trạng thái", "return_5d_pct": "Lợi nhuận 5P",
+                "relative_strength_20d_pct": "Mạnh/yếu 20P",
+                "breadth_ma20_pct": "% mã trên MA20", "volume_ratio": "KL/TB20",
+            })
+            st.dataframe(sector_df, hide_index=True, use_container_width=True)
+            with st.expander("Cách đọc điểm ngành"):
+                st.write(
+                    "Điểm 0–100 tổng hợp: sức mạnh tương đối 30%, độ rộng 25%, "
+                    "dòng tiền/khối lượng 20%, động lượng 15% và tỷ lệ cổ phiếu dẫn dắt 10%. "
+                    "Cột Thay đổi so với lần quét trước giúp phát hiện ngành đang tăng tốc hoặc suy yếu. "
+                    "Ngành chỉ có một mã đại diện cần được đọc thận trọng hơn."
+                )
+        else:
+            st.info("Chưa có dữ liệu ngành. Kết quả sẽ xuất hiện sau lần quét tự động tiếp theo.")
+
+        st.markdown("### 📋 Cổ phiếu trong danh mục")
         if scan_data["results"]:
             scan_df = pd.DataFrame(scan_data["results"]).sort_values("probability_t1", ascending=False)
             scan_df["probability_t1"] = scan_df["probability_t1"].apply(lambda x: f"{x*100:.0f}%")
