@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import json
 import os
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
+import time
 
 from features import build_features
 from market_context import analyze_market_context
@@ -54,33 +54,33 @@ def _market_listing():
     return None
 
 
-def _fetch_universe(universe: list[str], workers: int) -> dict:
+def _fetch_universe(universe: list[str], request_interval: float) -> dict:
+    """Điều tiết dưới giới hạn 20 request/phút của Vnstock Guest."""
     histories = {}
-    with ThreadPoolExecutor(max_workers=workers) as pool:
-        futures = {pool.submit(fetch_history_standalone, ticker, 500): ticker for ticker in universe}
-        for future in as_completed(futures):
-            ticker = futures[future]
-            try:
-                history = future.result()
-                if history is not None and not history.empty:
-                    histories[ticker] = history
-                    print(f"  {ticker}: {len(history)} phiên")
-            except Exception as exc:
-                print(f"  {ticker}: lỗi tải dữ liệu — {exc}")
+    for index, ticker in enumerate(universe):
+        if index:
+            time.sleep(request_interval)
+        try:
+            history = fetch_history_standalone(ticker, 500)
+            if history is not None and not history.empty:
+                histories[ticker] = history
+                print(f"  {ticker}: {len(history)} phiên")
+        except (Exception, SystemExit) as exc:
+            print(f"  {ticker}: lỗi tải dữ liệu — {exc}")
     return histories
 
 
 def main():
     universe_limit = int(os.environ.get("UNIVERSE_LIMIT", "120"))
     deep_limit = int(os.environ.get("DEEP_SCAN_LIMIT", "30"))
-    workers = max(1, min(8, int(os.environ.get("SCAN_WORKERS", "4"))))
+    request_interval = max(3.2, float(os.environ.get("REQUEST_INTERVAL_SECONDS", "3.2")))
     override = os.environ.get("WATCHLIST") or os.environ.get("MARKET_UNIVERSE")
     listing = None if override else _market_listing()
     universe = build_universe(listing, override, universe_limit)
-    print(f"Tầng 1: quét nhanh {len(universe)} mã với {workers} luồng")
+    print(f"Tầng 1: quét nhanh {len(universe)} mã, giãn cách {request_interval:.1f} giây/yêu cầu")
 
     vnindex_df = fetch_history_standalone("VNINDEX", 500)
-    histories = _fetch_universe(universe, workers)
+    histories = _fetch_universe(universe, request_interval)
     snapshots = []
     for ticker, history in histories.items():
         row = fast_snapshot(ticker, history, MIN_AVG_TRADE_VALUE)

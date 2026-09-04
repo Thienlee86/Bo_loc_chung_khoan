@@ -34,7 +34,7 @@ jobs:
           WATCHLIST: ${{ vars.WATCHLIST }}
           UNIVERSE_LIMIT: ${{ vars.UNIVERSE_LIMIT || '120' }}
           DEEP_SCAN_LIMIT: ${{ vars.DEEP_SCAN_LIMIT || '30' }}
-          SCAN_WORKERS: ${{ vars.SCAN_WORKERS || '4' }}
+          REQUEST_INTERVAL_SECONDS: ${{ vars.REQUEST_INTERVAL_SECONDS || '3.2' }}
         run: python scan_market.py
       - name: Commit kết quả
         run: |
