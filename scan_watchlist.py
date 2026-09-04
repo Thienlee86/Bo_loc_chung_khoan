@@ -20,6 +20,7 @@ from signals import add_signal_columns, compute_relative_strength
 from sector_analysis import attach_score_changes, calculate_sector_rankings, sector_for_ticker
 from market_context import analyze_market_context
 from trade_plan import build_trade_plan
+from paper_trading import process_journal
 from news_utils import fetch_all_news
 from smart_news import build_sector_news_scores, enrich_news
 
@@ -75,6 +76,12 @@ def main():
             previous_sector_rankings = json.load(old_file).get("sector_rankings", [])
     except (FileNotFoundError, json.JSONDecodeError):
         pass
+
+    try:
+        with open("paper_trades.json", "r", encoding="utf-8") as journal_file:
+            existing_journal = json.load(journal_file)
+    except (FileNotFoundError, json.JSONDecodeError):
+        existing_journal = None
 
     results = []
     histories = {}
@@ -150,9 +157,12 @@ def main():
             market_trend=market_trend,
         )
 
+    scanned_at = datetime.now().isoformat()
+    journal = process_journal(existing_journal, results, histories, scanned_at)
+
     output = {
-        "schema_version": 4,
-        "scanned_at": datetime.now().isoformat(),
+        "schema_version": 5,
+        "scanned_at": scanned_at,
         "watchlist": watchlist,
         "results": results,
         "sector_rankings": sector_rankings,
@@ -161,8 +171,13 @@ def main():
 
     with open("signals_latest.json", "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
+    with open("paper_trades.json", "w", encoding="utf-8") as f:
+        json.dump(journal, f, ensure_ascii=False, indent=2)
 
-    print(f"Đã lưu kết quả vào signals_latest.json ({len(results)}/{len(watchlist)} mã thành công, {len(sector_rankings)} nhóm ngành)")
+    print(
+        f"Đã lưu {len(results)}/{len(watchlist)} mã, {len(sector_rankings)} nhóm ngành "
+        f"và {journal['summary']['total_signals']} tín hiệu paper."
+    )
 
 
 if __name__ == "__main__":
