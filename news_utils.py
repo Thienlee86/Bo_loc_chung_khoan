@@ -161,10 +161,12 @@ def get_news_for_ticker(ticker: str, news_df: pd.DataFrame, use_claude: bool = F
     if news_df.empty:
         return news_df
 
-    mask = news_df.apply(
-        lambda r: match_ticker(f"{r['title']} {r['summary']}", ticker), axis=1
-    )
-    filtered = news_df[mask].copy()
+    # Làm sạch tin trùng và nhận diện thực thể trước khi lọc theo mã.
+    from smart_news import enrich_news
+    enriched = enrich_news(news_df)
+    if enriched.empty:
+        return enriched
+    filtered = enriched[enriched["tickers"].map(lambda items: ticker.upper() in items)].copy()
 
     if filtered.empty:
         return filtered
