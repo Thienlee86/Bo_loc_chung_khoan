@@ -17,7 +17,9 @@ import pandas as pd
 from features import build_features
 from models import quick_train_predict
 from signals import add_signal_columns, compute_relative_strength
-from sector_analysis import attach_score_changes, calculate_sector_rankings
+from sector_analysis import attach_score_changes, calculate_sector_rankings, sector_for_ticker
+from market_context import analyze_market_context
+from trade_plan import build_trade_plan
 from news_utils import fetch_all_news
 from smart_news import build_sector_news_scores, enrich_news
 
@@ -135,8 +137,21 @@ def main():
         previous_sector_rankings,
     )
 
+    sector_score_map = {row["sector"]: row["score"] for row in sector_rankings}
+    market_context = analyze_market_context(vnindex_df)
+    market_trend = market_context.get("trend") if market_context else None
+    for row in results:
+        ticker = row["ticker"]
+        row["sector"] = sector_for_ticker(ticker)
+        row["sector_score"] = sector_score_map.get(row["sector"])
+        row["trade_plan"] = build_trade_plan(
+            histories.get(ticker),
+            sector_score=row["sector_score"],
+            market_trend=market_trend,
+        )
+
     output = {
-        "schema_version": 3,
+        "schema_version": 4,
         "scanned_at": datetime.now().isoformat(),
         "watchlist": watchlist,
         "results": results,
