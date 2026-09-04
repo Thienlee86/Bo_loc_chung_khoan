@@ -21,6 +21,7 @@ from sector_analysis import attach_score_changes, calculate_sector_rankings, sec
 from market_context import analyze_market_context
 from trade_plan import build_trade_plan
 from paper_trading import process_journal
+from model_monitor import attach_quality_reports, summarize_model_health
 from news_utils import fetch_all_news
 from smart_news import build_sector_news_scores, enrich_news
 
@@ -116,6 +117,9 @@ def main():
                 "change_pct": float((raw["close"].iloc[-1] / raw["close"].iloc[-2] - 1) * 100),
                 "probability_t1": r1["probability"],
                 "quick_accuracy": r1["quick_accuracy"],
+                "quick_baseline_accuracy": r1["quick_baseline_accuracy"],
+                "brier_score": r1["brier_score"],
+                "n_test": r1["n_test"],
                 "volume_spike": bool(feats_sig["vol_spike"].iloc[-1]),
                 "relative_strength": rel_strength,
                 "avg_trade_value_bn": round(avg_trade_value / 1e9, 2),
@@ -159,14 +163,17 @@ def main():
 
     scanned_at = datetime.now().isoformat()
     journal = process_journal(existing_journal, results, histories, scanned_at)
+    results = attach_quality_reports(results, journal.get("trades", []))
+    model_health = summarize_model_health(results)
 
     output = {
-        "schema_version": 5,
+        "schema_version": 6,
         "scanned_at": scanned_at,
         "watchlist": watchlist,
         "results": results,
         "sector_rankings": sector_rankings,
         "news_digest": news_digest,
+        "model_health": model_health,
     }
 
     with open("signals_latest.json", "w", encoding="utf-8") as f:
