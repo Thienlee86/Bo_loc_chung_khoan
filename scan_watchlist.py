@@ -18,6 +18,8 @@ from features import build_features
 from models import quick_train_predict
 from signals import add_signal_columns, compute_relative_strength
 from sector_analysis import attach_score_changes, calculate_sector_rankings
+from news_utils import fetch_all_news
+from smart_news import build_sector_news_scores, enrich_news
 
 # Danh mục mặc định — VN30 (kỳ cơ cấu tháng 7/2026 của HOSE), sửa qua biến môi trường WATCHLIST nếu muốn khác
 DEFAULT_WATCHLIST = [
@@ -114,17 +116,32 @@ def main():
             print(f"  {tk}: lỗi — {e}")
             continue
 
+    try:
+        raw_news = fetch_all_news()
+        enriched_news = enrich_news(raw_news)
+        sector_news_scores = build_sector_news_scores(raw_news)
+        news_digest = {
+            "raw_count": int(len(raw_news)),
+            "unique_count": int(len(enriched_news)),
+            "sector_count": int(len(sector_news_scores)),
+        }
+    except Exception as exc:
+        print(f"Không lấy được tin tức ngành: {exc}")
+        sector_news_scores = {}
+        news_digest = {"raw_count": 0, "unique_count": 0, "sector_count": 0}
+
     sector_rankings = attach_score_changes(
-        calculate_sector_rankings(histories, vnindex_df),
+        calculate_sector_rankings(histories, vnindex_df, sector_news_scores),
         previous_sector_rankings,
     )
 
     output = {
-        "schema_version": 2,
+        "schema_version": 3,
         "scanned_at": datetime.now().isoformat(),
         "watchlist": watchlist,
         "results": results,
         "sector_rankings": sector_rankings,
+        "news_digest": news_digest,
     }
 
     with open("signals_latest.json", "w", encoding="utf-8") as f:
