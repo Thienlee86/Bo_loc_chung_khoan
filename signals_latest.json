@@ -1,6 +1,6 @@
 {
   "schema_version": 8,
-  "scanned_at": "2026-09-04T05:01:18.130787",
+  "scanned_at": "2026-09-04T13:44:07.157386",
   "watchlist": [
     "ACB",
     "BID",
@@ -140,7 +140,7 @@
   "news_digest": {
     "raw_count": 75,
     "unique_count": 75,
-    "sector_count": 4
+    "sector_count": 6
   },
   "model_health": {
     "status": "🟡 Đang tích lũy bằng chứng",
