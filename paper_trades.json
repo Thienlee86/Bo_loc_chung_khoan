@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-09-04T05:01:18.130787",
+  "transaction_cost_pct": 0.3,
+  "trades": [],
+  "summary": {
+    "total_signals": 0,
+    "open_signals": 0,
+    "closed_signals": 0,
+    "win_rate_pct": null,
+    "avg_net_return_pct": null,
+    "profit_factor": null,
+    "tp1_hit_rate_pct": null,
+    "stop_rate_pct": null,
+    "horizons": {
+      "t3": {
+        "count": 0,
+        "win_rate_pct": null,
+        "avg_return_pct": null
+      },
+      "t5": {
+        "count": 0,
+        "win_rate_pct": null,
+        "avg_return_pct": null
+      },
+      "t10": {
+        "count": 0,
+        "win_rate_pct": null,
+        "avg_return_pct": null
+      },
+      "t20": {
+        "count": 0,
+        "win_rate_pct": null,
+        "avg_return_pct": null
+      }
+    }
+  },
+  "sector_summary_t5": []
+}
