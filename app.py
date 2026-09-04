@@ -270,6 +270,10 @@ if _os.path.exists("signals_latest.json"):
             )
             if "avg_trade_value_bn" in scan_df.columns:
                 scan_df["avg_trade_value_bn"] = scan_df["avg_trade_value_bn"].apply(lambda x: f"{x:,.1f} tỷ")
+            if "model_quality" not in scan_df.columns:
+                scan_df["model_quality"] = [None] * len(scan_df)
+            if "trade_plan" not in scan_df.columns:
+                scan_df["trade_plan"] = [None] * len(scan_df)
             scan_df["model_status"] = scan_df["model_quality"].apply(
                 lambda quality: quality.get("label", "Chưa có") if isinstance(quality, dict) else "Chưa có"
             )
