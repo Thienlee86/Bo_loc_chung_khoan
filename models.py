@@ -112,12 +112,15 @@ def quick_train_predict(d: pd.DataFrame, target_col: str, test_frac: float = 0.2
     model.fit(train[FEATURE_COLS], train[target_col].astype(int))
     test_proba = model.predict_proba(test[FEATURE_COLS])[:, 1]
     actual = test[target_col].astype(int).to_numpy()
+    baseline_pred = (test["ret_1"] > 0).astype(int).to_numpy()
+    baseline_accuracy = float(np.mean(baseline_pred == actual))
     final_model = _classifier()
     final_model.fit(data[FEATURE_COLS], data[target_col].astype(int))
     latest_row = d.dropna(subset=FEATURE_COLS).iloc[[-1]]
     return {
         "probability": float(final_model.predict_proba(latest_row[FEATURE_COLS])[0][1]),
         "quick_accuracy": float(np.mean((test_proba >= 0.5).astype(int) == actual)),
+        "quick_baseline_accuracy": baseline_accuracy,
         "brier_score": float(np.mean((test_proba - actual) ** 2)),
         "n_test": len(test), "horizon": horizon,
     }
