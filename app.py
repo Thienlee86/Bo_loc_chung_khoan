@@ -296,6 +296,72 @@ else:
     )
 
 st.divider()
+st.markdown("## 🧪 Kiểm định paper trading")
+
+if _os.path.exists("paper_trades.json"):
+    try:
+        with open("paper_trades.json", "r", encoding="utf-8") as paper_file:
+            paper_data = _json.load(paper_file)
+        paper_summary = paper_data.get("summary", {})
+        pm1, pm2, pm3, pm4 = st.columns(4)
+        pm1.metric("Tổng tín hiệu", paper_summary.get("total_signals", 0))
+        pm2.metric("Đang theo dõi", paper_summary.get("open_signals", 0))
+        win_rate = paper_summary.get("win_rate_pct")
+        avg_return = paper_summary.get("avg_net_return_pct")
+        pm3.metric("Tỷ lệ thắng đã đóng", "Chưa đủ mẫu" if win_rate is None else f"{win_rate:.1f}%")
+        pm4.metric("Lợi nhuận ròng TB", "Chưa đủ mẫu" if avg_return is None else f"{avg_return:+.2f}%")
+
+        horizons = paper_summary.get("horizons", {})
+        horizon_rows = []
+        for key, label in [("t3", "T+3"), ("t5", "T+5"), ("t10", "T+10"), ("t20", "T+20")]:
+            metric = horizons.get(key, {})
+            horizon_rows.append({
+                "Mốc": label,
+                "Số mẫu": metric.get("count", 0),
+                "Tỷ lệ tăng": "Chưa đủ" if metric.get("win_rate_pct") is None else f"{metric['win_rate_pct']:.1f}%",
+                "Lợi nhuận ròng TB": "Chưa đủ" if metric.get("avg_return_pct") is None else f"{metric['avg_return_pct']:+.2f}%",
+            })
+        st.dataframe(pd.DataFrame(horizon_rows), hide_index=True, use_container_width=True)
+        st.caption(
+            f"Đã giả định tổng chi phí mua–bán {paper_data.get('transaction_cost_pct', 0.30):.2f}%. "
+            "Chỉ tín hiệu MUA THĂM DÒ mới được ghi. Nếu stop và TP cùng chạm trong một nến ngày, "
+            "app tính stop trước để tránh thiên lệch có lợi."
+        )
+
+        paper_trades = paper_data.get("trades", [])
+        if paper_trades:
+            recent_rows = []
+            for trade in paper_trades[:20]:
+                returns = trade.get("horizon_returns_pct", {})
+                recent_rows.append({
+                    "Ngày": trade.get("signal_date"), "Mã": trade.get("ticker"),
+                    "Ngành": trade.get("sector"), "Trạng thái": trade.get("status"),
+                    "Giá vào": trade.get("entry_price"), "Stop": trade.get("stop_loss"),
+                    "T+5": "Chờ" if returns.get("t5") is None else f"{returns['t5']:+.2f}%",
+                    "T+20": "Chờ" if returns.get("t20") is None else f"{returns['t20']:+.2f}%",
+                    "Kết quả lệnh": "Đang mở" if trade.get("net_return_pct") is None else f"{trade['net_return_pct']:+.2f}%",
+                    "Lý do thoát": trade.get("exit_reason") or "—",
+                })
+            with st.expander("Xem 20 tín hiệu paper gần nhất"):
+                st.dataframe(pd.DataFrame(recent_rows), hide_index=True, use_container_width=True)
+
+        sector_paper = paper_data.get("sector_summary_t5", [])
+        if sector_paper:
+            with st.expander("Hiệu quả T+5 theo nhóm ngành"):
+                sector_paper_df = pd.DataFrame(sector_paper).rename(columns={
+                    "sector": "Ngành", "count": "Số mẫu",
+                    "avg_return_pct": "Lợi nhuận TB (%)", "win_rate_pct": "Tỷ lệ tăng (%)",
+                })
+                st.dataframe(sector_paper_df, hide_index=True, use_container_width=True)
+    except Exception as exc:
+        st.warning(f"Nhật ký paper trading chưa đọc được: {exc}")
+else:
+    st.info(
+        "Chưa có nhật ký paper trading. File sẽ được tạo trong lần quét tự động kế tiếp; "
+        "các chỉ tiêu T+3/T+5/T+10/T+20 sẽ xuất hiện dần khi đủ số phiên thực tế."
+    )
+
+st.divider()
 
 
 # ---------------------------------------------------------------------------
