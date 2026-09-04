@@ -196,6 +196,21 @@ if _os.path.exists("signals_latest.json"):
             f"thanh khoản (trên tổng {len(scan_data.get('watchlist', []))} mã trong danh mục VN30)"
         )
 
+        model_health = scan_data.get("model_health")
+        if model_health:
+            st.markdown("### 🩺 Sức khỏe mô hình")
+            st.markdown(f"**{model_health['status']}**")
+            mh1, mh2, mh3, mh4 = st.columns(4)
+            mh1.metric("Đạt điều kiện", model_health.get("pass", 0))
+            mh2.metric("Chờ thêm mẫu", model_health.get("caution", 0))
+            mh3.metric("Không đạt", model_health.get("block", 0))
+            avg_edge = model_health.get("avg_edge_pp")
+            mh4.metric("Lợi thế TB vs baseline", "N/A" if avg_edge is None else f"{avg_edge:+.1f} điểm %")
+            st.caption(
+                "Chỉ trạng thái xanh khi mô hình vượt baseline, Brier đạt yêu cầu và có ít nhất "
+                "8 mẫu paper T+5 sinh lợi dương. Vàng là chưa đủ bằng chứng; đỏ là không đạt."
+            )
+
         sector_rows = scan_data.get("sector_rankings", [])
         if sector_rows:
             st.markdown("### 🧭 Sức mạnh nhóm ngành")
@@ -255,6 +270,15 @@ if _os.path.exists("signals_latest.json"):
             )
             if "avg_trade_value_bn" in scan_df.columns:
                 scan_df["avg_trade_value_bn"] = scan_df["avg_trade_value_bn"].apply(lambda x: f"{x:,.1f} tỷ")
+            scan_df["model_status"] = scan_df["model_quality"].apply(
+                lambda quality: quality.get("label", "Chưa có") if isinstance(quality, dict) else "Chưa có"
+            )
+            scan_df["model_edge"] = scan_df["model_quality"].apply(
+                lambda quality: (
+                    "N/A" if not isinstance(quality, dict) or quality.get("model_edge_pp") is None
+                    else f"{quality['model_edge_pp']:+.1f} điểm %"
+                )
+            )
             scan_df["trade_action"] = scan_df["trade_plan"].apply(
                 lambda plan: plan.get("action", "Chưa có") if isinstance(plan, dict) else "Chưa có"
             )
@@ -267,13 +291,14 @@ if _os.path.exists("signals_latest.json"):
             scan_df["tp2_level"] = scan_df["trade_plan"].apply(
                 lambda plan: f"{plan['tp2']:,.0f}" if isinstance(plan, dict) else "N/A"
             )
-            scan_df = scan_df.drop(columns=["trade_plan"], errors="ignore")
+            scan_df = scan_df.drop(columns=["trade_plan", "model_quality"], errors="ignore")
             scan_df = scan_df.rename(columns={
                 "ticker": "Mã", "price": "Giá", "change_pct": "% ngày",
                 "probability_t1": "Xác suất T+1", "quick_accuracy": "Acc nhanh",
                 "volume_spike": "KL bất thường", "relative_strength": "Mạnh/yếu vs VN-Index",
                 "avg_trade_value_bn": "GTGD TB/phiên", "sector": "Ngành",
-                "sector_score": "Điểm ngành", "trade_action": "Trạng thái",
+                "sector_score": "Điểm ngành", "model_status": "Chất lượng mô hình",
+                "model_edge": "Lợi thế vs baseline", "trade_action": "Trạng thái kỹ thuật",
                 "entry_zone": "Vùng mua", "stop_level": "Cắt lỗ", "tp2_level": "TP2",
             })
             st.dataframe(scan_df, hide_index=True, use_container_width=True)
