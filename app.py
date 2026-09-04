@@ -215,20 +215,27 @@ if _os.path.exists("signals_latest.json"):
             )
             sector_df["breadth_ma20_pct"] = sector_df["breadth_ma20_pct"].apply(lambda value: f"{value:.0f}%")
             sector_df["volume_ratio"] = sector_df["volume_ratio"].apply(lambda value: f"{value:.2f}x")
+            sector_df["news_score"] = sector_df["news_score"].apply(
+                lambda value: "Chưa có" if pd.isna(value) else f"{value:.0f}/100"
+            )
+            sector_df["news_count"] = sector_df["news_count"].apply(lambda value: f"{int(value)} tin")
             sector_df = sector_df[[
                 "sector", "score", "score_change", "status", "return_5d_pct",
                 "relative_strength_20d_pct", "breadth_ma20_pct", "volume_ratio",
+                "news_score", "news_count",
             ]].rename(columns={
                 "sector": "Nhóm ngành", "score": "Điểm", "score_change": "Thay đổi",
                 "status": "Trạng thái", "return_5d_pct": "Lợi nhuận 5P",
                 "relative_strength_20d_pct": "Mạnh/yếu 20P",
                 "breadth_ma20_pct": "% mã trên MA20", "volume_ratio": "KL/TB20",
+                "news_score": "Điểm tin", "news_count": "Bằng chứng",
             })
             st.dataframe(sector_df, hide_index=True, use_container_width=True)
             with st.expander("Cách đọc điểm ngành"):
                 st.write(
-                    "Điểm 0–100 tổng hợp: sức mạnh tương đối 30%, độ rộng 25%, "
-                    "dòng tiền/khối lượng 20%, động lượng 15% và tỷ lệ cổ phiếu dẫn dắt 10%. "
+                    "Khi ngành có tin: kỹ thuật chiếm 90% và tin tức chiếm 10%; khi chưa có tin, "
+                    "app giữ nguyên điểm kỹ thuật, không tự gán tin trung lập. Điểm tin đã loại bài trùng, "
+                    "giảm trọng số tin cũ và tăng trọng số cho sự kiện quan trọng. "
                     "Cột Thay đổi so với lần quét trước giúp phát hiện ngành đang tăng tốc hoặc suy yếu. "
                     "Ngành chỉ có một mã đại diện cần được đọc thận trọng hơn."
                 )
@@ -612,11 +619,11 @@ if run and ticker:
     # PANEL TIN TỨC
     # -----------------------------------------------------------------
     st.divider()
-    st.subheader("📰 Tin tức liên quan (tham khảo — chưa đưa vào mô hình)")
+    st.subheader("📰 Tin tức liên quan đã phân loại")
     st.caption(
-        "Sentiment tính bằng đếm từ khoá tích cực/tiêu cực (miễn phí, offline), "
-        "**không hiểu ngữ cảnh/phủ định** — chỉ mang tính gợi ý sơ bộ, bạn nên tự đọc "
-        "để đối chiếu với dự báo mô hình ở trên."
+        "Tin được loại trùng, nhận diện mã/ngành, phân loại sự kiện và chấm mức tác động. "
+        "Điểm tin tức được dùng cho 10% điểm ngành, nhưng chưa đưa trực tiếp vào mô hình ML của từng mã. "
+        "Bạn vẫn nên mở bài gốc để kiểm tra ngữ cảnh."
     )
 
     with st.spinner("Đang lấy tin tức mới nhất..."):
@@ -649,6 +656,10 @@ if run and ticker:
                 with st.expander(f"{icon} {row['title']}"):
                     st.write(row["summary"] if row["summary"] else "_Không có tóm tắt._")
                     st.caption(f"Nguồn: {row['source']} · {row['published']}")
+                    st.caption(
+                        f"Sự kiện: {row.get('event_type', 'Tin chung')} · "
+                        f"Mức tác động: {row.get('impact_level', 'Chưa rõ')}"
+                    )
                     if row.get("reason"):
                         st.caption(f"Nhận định: {row['reason']}")
                     if row["matched_words"]:
