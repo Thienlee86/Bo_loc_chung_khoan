@@ -157,9 +157,31 @@ def render_dashboard(scan_data: dict, paper_data: dict, market_ctx: dict | None,
         table = prepare_sector_table(scan_data.get("sector_rankings", []))
         st.dataframe(table, hide_index=True, use_container_width=True) if not table.empty else st.info("Chưa có dữ liệu ngành.")
     with tabs[2]:
-        st.subheader("Cổ phiếu trong danh mục")
-        table = prepare_stock_table(scan_data.get("results", []))
-        st.dataframe(table, hide_index=True, use_container_width=True) if not table.empty else st.info("Chưa có dữ liệu cổ phiếu.")
+        st.subheader("Bộ săn cổ phiếu tự động")
+        stats = scan_data.get("universe_stats", {})
+        if stats:
+            st.caption(
+                f"Đã tải {stats.get('downloaded', 0)}/{stats.get('requested', 0)} mã · "
+                f"{stats.get('liquid', 0)} mã đạt thanh khoản · "
+                f"{stats.get('deep_analyzed', 0)} mã được phân tích sâu"
+            )
+        opportunities = scan_data.get("opportunities", {})
+        groups = [
+            ("🟢 Mua thăm dò", opportunities.get("buy", []),
+             "Chỉ hiện khi kế hoạch mua và cổng chất lượng mô hình đều đạt."),
+            ("🟡 Theo dõi", opportunities.get("watch", scan_data.get("results", [])),
+             "Ứng viên có điểm tổng hợp cao nhưng còn điều kiện cần xác nhận."),
+            ("🔴 Nên tránh", opportunities.get("avoid", []),
+             "Mô hình mất lợi thế hoặc cấu trúc giá chưa phù hợp để mua."),
+        ]
+        for title, rows, help_text in groups:
+            st.markdown(f"**{title}**")
+            st.caption(help_text)
+            table = prepare_stock_table(rows)
+            if "Điểm cơ hội" not in table.columns and rows:
+                table.insert(2, "Điểm cơ hội", [row.get("opportunity_score") for row in rows])
+            st.dataframe(table, hide_index=True, use_container_width=True) if not table.empty else st.info("Chưa có mã phù hợp.")
+        st.caption("Ô nhập mã ở thanh bên chỉ dùng khi bạn muốn phân tích thêm một cổ phiếu ngoài danh sách tự động.")
     with tabs[3]: _render_news(st, news_loader)
     with tabs[4]: _render_paper(st, paper_data)
     with tabs[5]: _render_method(st)
