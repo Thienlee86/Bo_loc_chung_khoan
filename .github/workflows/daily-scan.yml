@@ -2,7 +2,7 @@ name: Quét danh mục hằng ngày
 
 on:
   schedule:
-    - cron: "15 1 * * 1-5" # 08:15 giờ Việt Nam
+    - cron: "20 9 * * 1-5" # 16:20 giờ Việt Nam, sau phiên giao dịch
   workflow_dispatch: {}
 
 permissions:
@@ -15,7 +15,7 @@ concurrency:
 jobs:
   scan:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -32,7 +32,10 @@ jobs:
         env:
           VNSTOCK_API_KEY: ${{ secrets.VNSTOCK_API_KEY }}
           WATCHLIST: ${{ vars.WATCHLIST }}
-        run: python scan_watchlist.py
+          UNIVERSE_LIMIT: ${{ vars.UNIVERSE_LIMIT || '120' }}
+          DEEP_SCAN_LIMIT: ${{ vars.DEEP_SCAN_LIMIT || '30' }}
+          SCAN_WORKERS: ${{ vars.SCAN_WORKERS || '4' }}
+        run: python scan_market.py
       - name: Commit kết quả
         run: |
           git config user.name "github-actions[bot]"
