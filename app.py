@@ -35,6 +35,7 @@ from signals import (
 from market_context import analyze_market_context, context_advisory_note
 from sector_analysis import sector_for_ticker
 from trade_plan import build_trade_plan, calculate_position_size
+from dashboard_ui import render_dashboard
 
 st.set_page_config(page_title="Dự báo CK Việt Nam (tham khảo)", layout="wide")
 
@@ -161,236 +162,56 @@ with st.sidebar:
 
 
 # ---------------------------------------------------------------------------
-# KẾT QUẢ QUÉT TỰ ĐỘNG — MÀN HÌNH CHÍNH (Giai đoạn 1: đẩy lên hàng đầu)
+# DASHBOARD NHIỀU TAB
 # ---------------------------------------------------------------------------
 
 import json as _json
 import os as _os
 
-st.markdown("## 🌅 Bảng tin sáng nay — VN30")
+st.markdown(
+    """
+    <style>
+    @media (max-width: 768px) {
+        .block-container {padding-top: 1rem; padding-left: .75rem; padding-right: .75rem;}
+        div[data-testid="stMetric"] {padding: .35rem;}
+        .stTabs [data-baseweb="tab-list"] {gap: .2rem; overflow-x: auto;}
+        .stTabs [data-baseweb="tab"] {min-width: max-content; padding: .45rem .65rem;}
+        h1 {font-size: 1.65rem !important;}
+        h2 {font-size: 1.35rem !important;}
+        h3 {font-size: 1.1rem !important;}
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+scan_data = {}
+paper_data = {}
+if _os.path.exists("signals_latest.json"):
+    try:
+        with open("signals_latest.json", "r", encoding="utf-8") as scan_file:
+            scan_data = _json.load(scan_file)
+    except Exception:
+        st.warning("File kết quả quét chưa đọc được.")
+if _os.path.exists("paper_trades.json"):
+    try:
+        with open("paper_trades.json", "r", encoding="utf-8") as paper_file:
+            paper_data = _json.load(paper_file)
+    except Exception:
+        st.warning("File nhật ký paper chưa đọc được.")
 
 try:
-    with st.spinner("Đang lấy bối cảnh thị trường chung (VN-Index)..."):
+    with st.spinner("Đang lấy bối cảnh VN-Index..."):
         vnindex_top = fetch_vnindex(300)
     market_ctx = analyze_market_context(vnindex_top)
 except Exception:
     market_ctx = None
 
-if market_ctx:
-    mc1, mc2, mc3 = st.columns(3)
-    mc1.metric("Xu hướng VN-Index", f"{market_ctx['trend_icon']} {market_ctx['trend']}")
-    mc2.metric("Mức biến động", f"{market_ctx['volatility_icon']} {market_ctx['volatility_level']}")
-    mc3.metric("VN-Index thay đổi 5 phiên", f"{market_ctx['change_5d_pct']:+.2f}%" if market_ctx['change_5d_pct'] is not None else "N/A")
-    st.caption(f"💡 {context_advisory_note(market_ctx)}")
-else:
-    st.caption("Không lấy được bối cảnh VN-Index — các tín hiệu bên dưới nên được đọc độc lập, thận trọng hơn.")
+if scan_data:
+    st.caption(f"Cập nhật gần nhất: {scan_data.get('scanned_at', 'N/A')}")
+render_dashboard(scan_data, paper_data, market_ctx, fetch_news_cached)
 
-st.divider()
-
-if _os.path.exists("signals_latest.json"):
-    try:
-        with open("signals_latest.json", "r", encoding="utf-8") as f:
-            scan_data = _json.load(f)
-        st.caption(
-            f"Quét lúc: {scan_data['scanned_at']} · {len(scan_data['results'])} mã đạt tiêu chuẩn "
-            f"thanh khoản (trên tổng {len(scan_data.get('watchlist', []))} mã trong danh mục VN30)"
-        )
-
-        model_health = scan_data.get("model_health")
-        if model_health:
-            st.markdown("### 🩺 Sức khỏe mô hình")
-            st.markdown(f"**{model_health['status']}**")
-            mh1, mh2, mh3, mh4 = st.columns(4)
-            mh1.metric("Đạt điều kiện", model_health.get("pass", 0))
-            mh2.metric("Chờ thêm mẫu", model_health.get("caution", 0))
-            mh3.metric("Không đạt", model_health.get("block", 0))
-            avg_edge = model_health.get("avg_edge_pp")
-            mh4.metric("Lợi thế TB vs baseline", "N/A" if avg_edge is None else f"{avg_edge:+.1f} điểm %")
-            st.caption(
-                "Chỉ trạng thái xanh khi mô hình vượt baseline, Brier đạt yêu cầu và có ít nhất "
-                "8 mẫu paper T+5 sinh lợi dương. Vàng là chưa đủ bằng chứng; đỏ là không đạt."
-            )
-
-        sector_rows = scan_data.get("sector_rankings", [])
-        if sector_rows:
-            st.markdown("### 🧭 Sức mạnh nhóm ngành")
-            status_icons = {
-                "Dẫn dắt mạnh": "🟢", "Đang cải thiện": "🔵",
-                "Trung tính / tích lũy": "⚪", "Suy yếu": "🟡",
-                "Điều chỉnh mạnh": "🔴",
-            }
-            sector_df = pd.DataFrame(sector_rows)
-            sector_df["status"] = sector_df["status"].apply(
-                lambda value: f"{status_icons.get(value, '⚪')} {value}"
-            )
-            sector_df["score_change"] = sector_df["score_change"].apply(
-                lambda value: "Mới" if pd.isna(value) else f"{value:+.1f}"
-            )
-            sector_df["return_5d_pct"] = sector_df["return_5d_pct"].apply(lambda value: f"{value:+.1f}%")
-            sector_df["relative_strength_20d_pct"] = sector_df["relative_strength_20d_pct"].apply(
-                lambda value: f"{value:+.1f}%"
-            )
-            sector_df["breadth_ma20_pct"] = sector_df["breadth_ma20_pct"].apply(lambda value: f"{value:.0f}%")
-            sector_df["volume_ratio"] = sector_df["volume_ratio"].apply(lambda value: f"{value:.2f}x")
-            sector_df["news_score"] = sector_df["news_score"].apply(
-                lambda value: "Chưa có" if pd.isna(value) else f"{value:.0f}/100"
-            )
-            sector_df["news_count"] = sector_df["news_count"].apply(lambda value: f"{int(value)} tin")
-            sector_df = sector_df[[
-                "sector", "score", "score_change", "status", "return_5d_pct",
-                "relative_strength_20d_pct", "breadth_ma20_pct", "volume_ratio",
-                "news_score", "news_count",
-            ]].rename(columns={
-                "sector": "Nhóm ngành", "score": "Điểm", "score_change": "Thay đổi",
-                "status": "Trạng thái", "return_5d_pct": "Lợi nhuận 5P",
-                "relative_strength_20d_pct": "Mạnh/yếu 20P",
-                "breadth_ma20_pct": "% mã trên MA20", "volume_ratio": "KL/TB20",
-                "news_score": "Điểm tin", "news_count": "Bằng chứng",
-            })
-            st.dataframe(sector_df, hide_index=True, use_container_width=True)
-            with st.expander("Cách đọc điểm ngành"):
-                st.write(
-                    "Khi ngành có tin: kỹ thuật chiếm 90% và tin tức chiếm 10%; khi chưa có tin, "
-                    "app giữ nguyên điểm kỹ thuật, không tự gán tin trung lập. Điểm tin đã loại bài trùng, "
-                    "giảm trọng số tin cũ và tăng trọng số cho sự kiện quan trọng. "
-                    "Cột Thay đổi so với lần quét trước giúp phát hiện ngành đang tăng tốc hoặc suy yếu. "
-                    "Ngành chỉ có một mã đại diện cần được đọc thận trọng hơn."
-                )
-        else:
-            st.info("Chưa có dữ liệu ngành. Kết quả sẽ xuất hiện sau lần quét tự động tiếp theo.")
-
-        st.markdown("### 📋 Cổ phiếu trong danh mục")
-        if scan_data["results"]:
-            scan_df = pd.DataFrame(scan_data["results"]).sort_values("probability_t1", ascending=False)
-            scan_df["probability_t1"] = scan_df["probability_t1"].apply(lambda x: f"{x*100:.0f}%")
-            scan_df["quick_accuracy"] = scan_df["quick_accuracy"].apply(lambda x: f"{x*100:.0f}%")
-            scan_df["volume_spike"] = scan_df["volume_spike"].apply(lambda x: "🟡 Có" if x else "⚪ Không")
-            scan_df["relative_strength"] = scan_df["relative_strength"].apply(
-                lambda x: f"{x*100:+.1f}%" if x is not None else "N/A"
-            )
-            if "avg_trade_value_bn" in scan_df.columns:
-                scan_df["avg_trade_value_bn"] = scan_df["avg_trade_value_bn"].apply(lambda x: f"{x:,.1f} tỷ")
-            if "model_quality" not in scan_df.columns:
-                scan_df["model_quality"] = [None] * len(scan_df)
-            if "trade_plan" not in scan_df.columns:
-                scan_df["trade_plan"] = [None] * len(scan_df)
-            scan_df["model_status"] = scan_df["model_quality"].apply(
-                lambda quality: quality.get("label", "Chưa có") if isinstance(quality, dict) else "Chưa có"
-            )
-            scan_df["model_edge"] = scan_df["model_quality"].apply(
-                lambda quality: (
-                    "N/A" if not isinstance(quality, dict) or quality.get("model_edge_pp") is None
-                    else f"{quality['model_edge_pp']:+.1f} điểm %"
-                )
-            )
-            scan_df["trade_action"] = scan_df["trade_plan"].apply(
-                lambda plan: plan.get("action", "Chưa có") if isinstance(plan, dict) else "Chưa có"
-            )
-            scan_df["entry_zone"] = scan_df["trade_plan"].apply(
-                lambda plan: f"{plan['entry_low']:,.0f}–{plan['entry_high']:,.0f}" if isinstance(plan, dict) else "N/A"
-            )
-            scan_df["stop_level"] = scan_df["trade_plan"].apply(
-                lambda plan: f"{plan['stop_loss']:,.0f}" if isinstance(plan, dict) else "N/A"
-            )
-            scan_df["tp2_level"] = scan_df["trade_plan"].apply(
-                lambda plan: f"{plan['tp2']:,.0f}" if isinstance(plan, dict) else "N/A"
-            )
-            scan_df = scan_df.drop(columns=["trade_plan", "model_quality"], errors="ignore")
-            scan_df = scan_df.rename(columns={
-                "ticker": "Mã", "price": "Giá", "change_pct": "% ngày",
-                "probability_t1": "Xác suất T+1", "quick_accuracy": "Acc nhanh",
-                "volume_spike": "KL bất thường", "relative_strength": "Mạnh/yếu vs VN-Index",
-                "avg_trade_value_bn": "GTGD TB/phiên", "sector": "Ngành",
-                "sector_score": "Điểm ngành", "model_status": "Chất lượng mô hình",
-                "model_edge": "Lợi thế vs baseline", "trade_action": "Trạng thái kỹ thuật",
-                "entry_zone": "Vùng mua", "stop_level": "Cắt lỗ", "tp2_level": "TP2",
-            })
-            st.dataframe(scan_df, hide_index=True, use_container_width=True)
-            st.caption(
-                "Đã tự động loại các mã có giá trị giao dịch trung bình dưới 2 tỷ đ/phiên "
-                "(thanh khoản quá thấp, tín hiệu kỹ thuật dễ bị nhiễu). "
-                "Đây là kết quả quét nhanh — bấm 'Chạy dự báo chi tiết' ở mã bạn quan tâm để xem đầy đủ "
-                "backtest, vùng giá, và kiểm định tín hiệu trước khi cân nhắc."
-            )
-        else:
-            st.info("Lần quét gần nhất không có mã nào đạt tiêu chuẩn thanh khoản.")
-    except Exception:
-        st.warning("File kết quả quét bị lỗi hoặc chưa đầy đủ. Thử chạy lại workflow trên GitHub Actions.")
-else:
-    st.info(
-        "**Chưa có kết quả quét tự động.** App đang ở chế độ chờ — bạn cần bật tính năng quét hằng ngày "
-        "qua GitHub Actions (xem mục 'Tự động quét mỗi sáng' trong README) để bảng này tự có dữ liệu mỗi "
-        "khi bạn mở app, không cần tự bấm nút. Trong lúc chờ, bạn vẫn dùng được phần 'Xếp hạng danh mục' "
-        "hoặc 'Chạy dự báo chi tiết' ở sidebar bên trái."
-    )
-
-st.divider()
-st.markdown("## 🧪 Kiểm định paper trading")
-
-if _os.path.exists("paper_trades.json"):
-    try:
-        with open("paper_trades.json", "r", encoding="utf-8") as paper_file:
-            paper_data = _json.load(paper_file)
-        paper_summary = paper_data.get("summary", {})
-        pm1, pm2, pm3, pm4 = st.columns(4)
-        pm1.metric("Tổng tín hiệu", paper_summary.get("total_signals", 0))
-        pm2.metric("Đang theo dõi", paper_summary.get("open_signals", 0))
-        win_rate = paper_summary.get("win_rate_pct")
-        avg_return = paper_summary.get("avg_net_return_pct")
-        pm3.metric("Tỷ lệ thắng đã đóng", "Chưa đủ mẫu" if win_rate is None else f"{win_rate:.1f}%")
-        pm4.metric("Lợi nhuận ròng TB", "Chưa đủ mẫu" if avg_return is None else f"{avg_return:+.2f}%")
-
-        horizons = paper_summary.get("horizons", {})
-        horizon_rows = []
-        for key, label in [("t3", "T+3"), ("t5", "T+5"), ("t10", "T+10"), ("t20", "T+20")]:
-            metric = horizons.get(key, {})
-            horizon_rows.append({
-                "Mốc": label,
-                "Số mẫu": metric.get("count", 0),
-                "Tỷ lệ tăng": "Chưa đủ" if metric.get("win_rate_pct") is None else f"{metric['win_rate_pct']:.1f}%",
-                "Lợi nhuận ròng TB": "Chưa đủ" if metric.get("avg_return_pct") is None else f"{metric['avg_return_pct']:+.2f}%",
-            })
-        st.dataframe(pd.DataFrame(horizon_rows), hide_index=True, use_container_width=True)
-        st.caption(
-            f"Đã giả định tổng chi phí mua–bán {paper_data.get('transaction_cost_pct', 0.30):.2f}%. "
-            "Chỉ tín hiệu MUA THĂM DÒ mới được ghi. Nếu stop và TP cùng chạm trong một nến ngày, "
-            "app tính stop trước để tránh thiên lệch có lợi."
-        )
-
-        paper_trades = paper_data.get("trades", [])
-        if paper_trades:
-            recent_rows = []
-            for trade in paper_trades[:20]:
-                returns = trade.get("horizon_returns_pct", {})
-                recent_rows.append({
-                    "Ngày": trade.get("signal_date"), "Mã": trade.get("ticker"),
-                    "Ngành": trade.get("sector"), "Trạng thái": trade.get("status"),
-                    "Giá vào": trade.get("entry_price"), "Stop": trade.get("stop_loss"),
-                    "T+5": "Chờ" if returns.get("t5") is None else f"{returns['t5']:+.2f}%",
-                    "T+20": "Chờ" if returns.get("t20") is None else f"{returns['t20']:+.2f}%",
-                    "Kết quả lệnh": "Đang mở" if trade.get("net_return_pct") is None else f"{trade['net_return_pct']:+.2f}%",
-                    "Lý do thoát": trade.get("exit_reason") or "—",
-                })
-            with st.expander("Xem 20 tín hiệu paper gần nhất"):
-                st.dataframe(pd.DataFrame(recent_rows), hide_index=True, use_container_width=True)
-
-        sector_paper = paper_data.get("sector_summary_t5", [])
-        if sector_paper:
-            with st.expander("Hiệu quả T+5 theo nhóm ngành"):
-                sector_paper_df = pd.DataFrame(sector_paper).rename(columns={
-                    "sector": "Ngành", "count": "Số mẫu",
-                    "avg_return_pct": "Lợi nhuận TB (%)", "win_rate_pct": "Tỷ lệ tăng (%)",
-                })
-                st.dataframe(sector_paper_df, hide_index=True, use_container_width=True)
-    except Exception as exc:
-        st.warning(f"Nhật ký paper trading chưa đọc được: {exc}")
-else:
-    st.info(
-        "Chưa có nhật ký paper trading. File sẽ được tạo trong lần quét tự động kế tiếp; "
-        "các chỉ tiêu T+3/T+5/T+10/T+20 sẽ xuất hiện dần khi đủ số phiên thực tế."
-    )
-
-st.divider()
+st.markdown("## 🔎 Phân tích chi tiết theo mã")
 
 
 # ---------------------------------------------------------------------------
