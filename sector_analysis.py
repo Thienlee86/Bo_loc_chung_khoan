@@ -74,7 +74,11 @@ def classify_sector(score: float) -> str:
     return "Điều chỉnh mạnh"
 
 
-def calculate_sector_rankings(histories: dict[str, pd.DataFrame], benchmark: pd.DataFrame | None) -> list[dict]:
+def calculate_sector_rankings(
+    histories: dict[str, pd.DataFrame],
+    benchmark: pd.DataFrame | None,
+    sector_news_scores: dict[str, dict] | None = None,
+) -> list[dict]:
     """Tính Sector Score 0-100 từ năm thành phần độc lập.
 
     Trọng số giai đoạn 2 (chưa có tin tức): sức mạnh tương đối 30%, độ rộng
@@ -110,13 +114,27 @@ def calculate_sector_rankings(histories: dict[str, pd.DataFrame], benchmark: pd.
     momentum_raw = grouped["return_5d"].fillna(0) * 0.4 + grouped["return_20d"].fillna(0) * 0.6
     grouped["momentum_score"] = _percentile_score(momentum_raw)
     grouped["leadership_score"] = grouped["leader_ratio"] * 100
-    grouped["score"] = (
+    grouped["technical_score"] = (
         grouped["relative_strength_score"] * 0.30
         + grouped["breadth_score"] * 0.25
         + grouped["flow_score"] * 0.20
         + grouped["momentum_score"] * 0.15
         + grouped["leadership_score"] * 0.10
-    ).clip(0, 100).round(1)
+    ).clip(0, 100)
+    sector_news_scores = sector_news_scores or {}
+    grouped["news_score"] = grouped["sector"].map(
+        lambda sector: sector_news_scores.get(sector, {}).get("score", np.nan)
+    )
+    grouped["news_count"] = grouped["sector"].map(
+        lambda sector: int(sector_news_scores.get(sector, {}).get("article_count", 0))
+    )
+    # Khi có tin: kỹ thuật 90% + tin tức 10%. Khi không có tin, không tự gán trung lập.
+    grouped["score"] = np.where(
+        grouped["news_count"] > 0,
+        grouped["technical_score"] * 0.90 + grouped["news_score"] * 0.10,
+        grouped["technical_score"],
+    )
+    grouped["score"] = grouped["score"].clip(0, 100).round(1)
     grouped["status"] = grouped["score"].map(classify_sector)
     grouped = grouped.sort_values(["score", "relative_strength_20d"], ascending=False)
 
@@ -131,6 +149,8 @@ def calculate_sector_rankings(histories: dict[str, pd.DataFrame], benchmark: pd.
             "breadth_ma50_pct": round(float(row["breadth_ma50"] * 100), 1),
             "volume_ratio": round(float(row["volume_ratio"]), 2),
             "leader_ratio_pct": round(float(row["leader_ratio"] * 100), 1),
+            "news_score": round(float(row["news_score"]), 1) if np.isfinite(row["news_score"]) else None,
+            "news_count": int(row["news_count"]),
         })
     return result
 
