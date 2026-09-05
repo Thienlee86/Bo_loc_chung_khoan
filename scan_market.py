@@ -153,7 +153,7 @@ def main():
     results = attach_quality_reports(results, journal.get("trades", []))
     opportunities = categorize_opportunities(results)
     output = {
-        "schema_version": 8, "scanned_at": scanned_at, "watchlist": universe,
+        "schema_version": 9, "scanned_at": scanned_at, "watchlist": universe,
         "universe_stats": {"requested": len(universe), "downloaded": len(histories),
                            "liquid": len(fast_ranking), "deep_analyzed": len(results)},
         "fast_ranking": fast_ranking[:50], "opportunities": opportunities,
@@ -165,8 +165,9 @@ def main():
     with open("paper_trades.json", "w", encoding="utf-8") as handle:
         json.dump(journal, handle, ensure_ascii=False, indent=2)
     print(f"Hoàn tất: {len(fast_ranking)} mã đạt thanh khoản, {len(results)} mã phân tích sâu, "
-          f"{len(opportunities['buy'])} mua / {len(opportunities['watch'])} theo dõi / "
-          f"{len(opportunities['avoid'])} tránh.")
+          f"{len(opportunities['buy'])} mua xác nhận / "
+          f"{len(opportunities.get('experimental', []))} mua thử nghiệm / "
+          f"{len(opportunities['watch'])} theo dõi / {len(opportunities['avoid'])} tránh.")
 
 
 if __name__ == "__main__":
