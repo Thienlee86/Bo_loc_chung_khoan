@@ -127,8 +127,22 @@ def categorize_opportunities(results: list[dict], buy_limit: int = 5,
     ranked.sort(key=lambda item: item["opportunity_score"], reverse=True)
     buy = [r for r in ranked if (r.get("model_quality") or {}).get("gate") == "PASS"
            and (r.get("trade_plan") or {}).get("action") == "MUA THĂM DÒ"][:buy_limit]
+    # Ứng viên thử nghiệm chỉ dùng cho paper trading: mô hình chưa đủ mẫu PASS,
+    # nhưng kế hoạch, vùng giá và sức mạnh ngành đã đạt ngưỡng tối thiểu.
+    experimental = []
+    for row in ranked:
+        plan = row.get("trade_plan") or {}
+        price, entry_high = row.get("price"), plan.get("entry_high")
+        near_entry = isinstance(price, (int, float)) and isinstance(entry_high, (int, float)) and price <= entry_high * 1.01
+        if ((row.get("model_quality") or {}).get("gate") == "CAUTION"
+                and plan.get("action") == "CHỜ ĐIỂM MUA"
+                and float(row.get("opportunity_score") or 0) >= 55
+                and float(row.get("sector_score") or 0) >= 55
+                and near_entry):
+            experimental.append(row)
+    experimental = experimental[:buy_limit]
     avoid = [r for r in reversed(ranked) if (r.get("model_quality") or {}).get("gate") == "BLOCK"
              or (r.get("trade_plan") or {}).get("action") == "KHÔNG MUA"][:avoid_limit]
-    excluded = {r["ticker"] for r in buy + avoid}
+    excluded = {r["ticker"] for r in buy + experimental + avoid}
     watch = [r for r in ranked if r.get("ticker") not in excluded][:watch_limit]
-    return {"buy": buy, "watch": watch, "avoid": avoid}
+    return {"buy": buy, "experimental": experimental, "watch": watch, "avoid": avoid}
