@@ -66,7 +66,9 @@ def fast_snapshot(ticker: str, history: pd.DataFrame,
     volume = pd.to_numeric(history["volume"], errors="coerce")
     if close.tail(60).isna().any() or float(close.iloc[-1]) <= 0:
         return None
-    avg_value = float((close * volume).tail(20).mean())
+    # Vnstock thường trả giá cổ phiếu theo nghìn đồng; một số nguồn trả theo đồng.
+    price_scale = 1_000.0 if float(close.tail(20).median()) < 1_000 else 1.0
+    avg_value = float((close * price_scale * volume).tail(20).mean())
     if not np.isfinite(avg_value) or avg_value < min_avg_trade_value:
         return None
     ma20, ma50 = float(close.tail(20).mean()), float(close.tail(50).mean())
