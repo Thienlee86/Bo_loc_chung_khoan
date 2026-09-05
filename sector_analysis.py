@@ -9,15 +9,24 @@ import pandas as pd
 # Phân nhóm phục vụ phân tích dòng tiền, ưu tiên cách gọi dễ hiểu trên app.
 # Mã chưa có trong bảng vẫn được giữ lại dưới nhóm "Chưa phân loại".
 TICKER_SECTORS = {
-    "ACB": "Ngân hàng", "BID": "Ngân hàng", "CTG": "Ngân hàng",
-    "HDB": "Ngân hàng", "MBB": "Ngân hàng", "SSB": "Ngân hàng",
-    "STB": "Ngân hàng", "TCB": "Ngân hàng", "TPB": "Ngân hàng",
-    "VCB": "Ngân hàng", "VIB": "Ngân hàng", "VPB": "Ngân hàng",
-    "BSR": "Dầu khí", "GAS": "Dầu khí", "PLX": "Dầu khí",
-    "VHM": "Bất động sản", "VIC": "Bất động sản", "VRE": "Bất động sản",
-    "MSN": "Tiêu dùng", "SAB": "Tiêu dùng", "VNM": "Tiêu dùng",
-    "MWG": "Bán lẻ", "FPT": "Công nghệ", "HPG": "Thép",
-    "GVR": "Cao su & KCN", "POW": "Điện", "SSI": "Chứng khoán",
+    "ACB": "Ngân hàng", "BID": "Ngân hàng", "CTG": "Ngân hàng", "EIB": "Ngân hàng",
+    "HDB": "Ngân hàng", "LPB": "Ngân hàng", "MBB": "Ngân hàng", "MSB": "Ngân hàng",
+    "OCB": "Ngân hàng", "SHB": "Ngân hàng", "SSB": "Ngân hàng", "STB": "Ngân hàng",
+    "TCB": "Ngân hàng", "TPB": "Ngân hàng", "VCB": "Ngân hàng", "VIB": "Ngân hàng", "VPB": "Ngân hàng",
+    "SSI": "Chứng khoán", "HCM": "Chứng khoán", "MBS": "Chứng khoán", "ORS": "Chứng khoán",
+    "SHS": "Chứng khoán", "VCI": "Chứng khoán", "VDS": "Chứng khoán", "VIX": "Chứng khoán", "VND": "Chứng khoán",
+    "BSR": "Dầu khí", "GAS": "Dầu khí", "PLX": "Dầu khí", "PVD": "Dầu khí", "PVS": "Dầu khí", "PVT": "Dầu khí", "PET": "Dầu khí",
+    "VHM": "Bất động sản", "VIC": "Bất động sản", "VRE": "Bất động sản", "DXG": "Bất động sản",
+    "DIG": "Bất động sản", "NLG": "Bất động sản", "KDH": "Bất động sản", "PDR": "Bất động sản", "TCH": "Bất động sản", "VPI": "Bất động sản", "AGG": "Bất động sản",
+    "BCM": "Khu công nghiệp", "IDC": "Khu công nghiệp", "KBC": "Khu công nghiệp", "GVR": "Cao su & KCN", "PHR": "Cao su & KCN", "VGC": "Vật liệu & KCN",
+    "HPG": "Thép", "HSG": "Thép", "NKG": "Thép", "KSB": "Vật liệu xây dựng", "BMP": "Vật liệu xây dựng", "AAA": "Nhựa & bao bì",
+    "FPT": "Công nghệ", "CMG": "Công nghệ", "DGW": "Phân phối công nghệ", "FRT": "Bán lẻ", "MWG": "Bán lẻ",
+    "MSN": "Tiêu dùng", "SAB": "Tiêu dùng", "VNM": "Tiêu dùng", "SBT": "Thực phẩm",
+    "PAN": "Nông nghiệp", "DBC": "Nông nghiệp", "BAF": "Nông nghiệp", "HAG": "Nông nghiệp", "ANV": "Thủy sản", "VHC": "Thủy sản",
+    "DCM": "Phân bón", "DPM": "Phân bón", "DGC": "Hóa chất",
+    "POW": "Điện", "NT2": "Điện", "PC1": "Điện", "REE": "Điện & hạ tầng", "HDG": "Điện & bất động sản",
+    "GEX": "Thiết bị điện", "GMD": "Cảng & logistics", "HAH": "Vận tải biển", "VOS": "Vận tải biển", "VSC": "Cảng & logistics",
+    "CII": "Hạ tầng", "HHV": "Hạ tầng", "VCG": "Xây dựng & hạ tầng",
     "BVH": "Bảo hiểm", "VJC": "Hàng không", "VPL": "Du lịch & giải trí",
 }
 
