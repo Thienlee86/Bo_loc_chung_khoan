@@ -37,7 +37,7 @@ jobs:
           UNIVERSE_LIMIT: ${{ vars.UNIVERSE_LIMIT || '120' }}
           DEEP_SCAN_LIMIT: ${{ vars.DEEP_SCAN_LIMIT || '30' }}
           REQUEST_INTERVAL_SECONDS: ${{ vars.REQUEST_INTERVAL_SECONDS || '3.2' }}
-          INTRADAY_LIMIT: ${{ vars.INTRADAY_LIMIT || '30' }}
+          INTRADAY_LIMIT: ${{ vars.INTRADAY_LIMIT || '10' }}
         run: |
           if [ "${{ github.event.schedule }}" = "35 4 * * 1-5" ]; then
             python intraday_update.py
