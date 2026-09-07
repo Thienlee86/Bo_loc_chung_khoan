@@ -6,6 +6,9 @@ on:
     - cron: "35 4 * * 1-5"  # 11:35 giờ Việt Nam: snapshot giữa phiên
     - cron: "20 8 * * 1-5"  # 15:20 giờ Việt Nam: quét đầy đủ sau phiên
   workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths: [".github/run-scan.trigger"]
 
 permissions:
   contents: write
