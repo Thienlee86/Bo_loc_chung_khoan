@@ -2,7 +2,9 @@ name: Quét danh mục hằng ngày
 
 on:
   schedule:
-    - cron: "20 9 * * 1-5" # 16:20 giờ Việt Nam, sau phiên giao dịch
+    - cron: "0 1 * * 1-5"   # 08:00 giờ Việt Nam: chuẩn bị trước phiên
+    - cron: "35 4 * * 1-5"  # 11:35 giờ Việt Nam: snapshot giữa phiên
+    - cron: "20 8 * * 1-5"  # 15:20 giờ Việt Nam: quét đầy đủ sau phiên
   workflow_dispatch: {}
 
 permissions:
@@ -28,14 +30,20 @@ jobs:
         run: |
           python -m compileall -q .
           python -m pytest -q
-      - name: Chạy quét
+      - name: Chạy lượt cập nhật phù hợp
         env:
           VNSTOCK_API_KEY: ${{ secrets.VNSTOCK_API_KEY }}
           WATCHLIST: ${{ vars.WATCHLIST }}
           UNIVERSE_LIMIT: ${{ vars.UNIVERSE_LIMIT || '120' }}
           DEEP_SCAN_LIMIT: ${{ vars.DEEP_SCAN_LIMIT || '30' }}
           REQUEST_INTERVAL_SECONDS: ${{ vars.REQUEST_INTERVAL_SECONDS || '3.2' }}
-        run: python scan_market.py
+          INTRADAY_LIMIT: ${{ vars.INTRADAY_LIMIT || '30' }}
+        run: |
+          if [ "${{ github.event.schedule }}" = "35 4 * * 1-5" ]; then
+            python intraday_update.py
+          else
+            python scan_market.py
+          fi
       - name: Commit kết quả
         run: |
           git config user.name "github-actions[bot]"
