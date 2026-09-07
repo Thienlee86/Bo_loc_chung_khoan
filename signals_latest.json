@@ -1,6 +1,6 @@
 {
   "schema_version": 9,
-  "scanned_at": "2026-09-07T10:15:07.220490",
+  "scanned_at": "2026-09-07T14:27:38.713566",
   "watchlist": [
     "ACB",
     "BID",
@@ -703,7 +703,7 @@
         "volume_spike": false,
         "relative_strength": -0.020670697154265616,
         "sector": "Bất động sản",
-        "sector_score": 67.1,
+        "sector_score": 66.8,
         "trade_plan": {
           "action": "CHỜ ĐIỂM MUA",
           "reason": "Chưa đồng thời thỏa vị trí giá và sức mạnh ngành.",
@@ -768,7 +768,7 @@
         "volume_spike": false,
         "relative_strength": 0.14698119118727782,
         "sector": "Bất động sản",
-        "sector_score": 67.1,
+        "sector_score": 66.8,
         "trade_plan": {
           "action": "KHÔNG MUA ĐUỔI",
           "reason": "Giá đã đi xa hơn vùng mua trên 0,5 ATR.",
@@ -894,7 +894,7 @@
         "volume_spike": false,
         "relative_strength": 0.0393822128986443,
         "sector": "Bất động sản",
-        "sector_score": 67.1,
+        "sector_score": 66.8,
         "trade_plan": {
           "action": "MUA THĂM DÒ",
           "reason": "Giá trong vùng mua và ngành không yếu.",
@@ -935,7 +935,7 @@
             "Paper T+5 mới có 0/8 mẫu"
           ]
         },
-        "opportunity_score": 66.1
+        "opportunity_score": 66.0
       },
       {
         "ticker": "MSN",
@@ -1083,7 +1083,7 @@
         "volume_spike": false,
         "relative_strength": 0.06972000131542733,
         "sector": "Bất động sản",
-        "sector_score": 67.1,
+        "sector_score": 66.8,
         "trade_plan": {
           "action": "KHÔNG MUA ĐUỔI",
           "reason": "Giá đã đi xa hơn vùng mua trên 0,5 ATR.",
@@ -1723,7 +1723,7 @@
       "volume_spike": false,
       "relative_strength": 0.08820376172019317,
       "sector": "Bất động sản",
-      "sector_score": 67.1,
+      "sector_score": 66.8,
       "trade_plan": {
         "action": "KHÔNG MUA ĐUỔI",
         "reason": "Giá đã đi xa hơn vùng mua trên 0,5 ATR.",
@@ -2099,7 +2099,7 @@
       "volume_spike": false,
       "relative_strength": 0.14698119118727782,
       "sector": "Bất động sản",
-      "sector_score": 67.1,
+      "sector_score": 66.8,
       "trade_plan": {
         "action": "KHÔNG MUA ĐUỔI",
         "reason": "Giá đã đi xa hơn vùng mua trên 0,5 ATR.",
@@ -2161,7 +2161,7 @@
       "volume_spike": true,
       "relative_strength": -0.004638651065508759,
       "sector": "Bất động sản",
-      "sector_score": 67.1,
+      "sector_score": 66.8,
       "trade_plan": {
         "action": "KHÔNG MUA ĐUỔI",
         "reason": "Giá đã đi xa hơn vùng mua trên 0,5 ATR.",
@@ -2224,7 +2224,7 @@
       "volume_spike": false,
       "relative_strength": 0.004439375324228001,
       "sector": "Công nghệ",
-      "sector_score": 45.4,
+      "sector_score": 45.5,
       "trade_plan": {
         "action": "KHÔNG MUA ĐUỔI",
         "reason": "Giá đã đi xa hơn vùng mua trên 0,5 ATR.",
@@ -2662,7 +2662,7 @@
       "volume_spike": false,
       "relative_strength": 0.06972000131542733,
       "sector": "Bất động sản",
-      "sector_score": 67.1,
+      "sector_score": 66.8,
       "trade_plan": {
         "action": "KHÔNG MUA ĐUỔI",
         "reason": "Giá đã đi xa hơn vùng mua trên 0,5 ATR.",
@@ -3098,7 +3098,7 @@
       "volume_spike": false,
       "relative_strength": 0.0393822128986443,
       "sector": "Bất động sản",
-      "sector_score": 67.1,
+      "sector_score": 66.8,
       "trade_plan": {
         "action": "MUA THĂM DÒ",
         "reason": "Giá trong vùng mua và ngành không yếu.",
@@ -3159,7 +3159,7 @@
       "volume_spike": true,
       "relative_strength": -0.05157639276584358,
       "sector": "Bất động sản",
-      "sector_score": 67.1,
+      "sector_score": 66.8,
       "trade_plan": {
         "action": "CHỜ ĐIỂM MUA",
         "reason": "Chưa đồng thời thỏa vị trí giá và sức mạnh ngành.",
@@ -3221,7 +3221,7 @@
       "volume_spike": false,
       "relative_strength": -0.001570696348392353,
       "sector": "Bất động sản",
-      "sector_score": 67.1,
+      "sector_score": 66.8,
       "trade_plan": {
         "action": "CHỜ ĐIỂM MUA",
         "reason": "Chưa đồng thời thỏa vị trí giá và sức mạnh ngành.",
@@ -3284,7 +3284,7 @@
       "volume_spike": false,
       "relative_strength": -0.020670697154265616,
       "sector": "Bất động sản",
-      "sector_score": 67.1,
+      "sector_score": 66.8,
       "trade_plan": {
         "action": "CHỜ ĐIỂM MUA",
         "reason": "Chưa đồng thời thỏa vị trí giá và sức mạnh ngành.",
@@ -3530,7 +3530,7 @@
       "leader_ratio_pct": 100.0,
       "news_score": null,
       "news_count": 0,
-      "score_change": null
+      "score_change": 0.0
     },
     {
       "sector": "Phân phối công nghệ",
@@ -3546,7 +3546,7 @@
       "leader_ratio_pct": 100.0,
       "news_score": null,
       "news_count": 0,
-      "score_change": null
+      "score_change": 0.0
     },
     {
       "sector": "Cao su & KCN",
@@ -3562,7 +3562,7 @@
       "leader_ratio_pct": 100.0,
       "news_score": null,
       "news_count": 0,
-      "score_change": 37.3
+      "score_change": 0.0
     },
     {
       "sector": "Thực phẩm",
@@ -3578,7 +3578,7 @@
       "leader_ratio_pct": 100.0,
       "news_score": null,
       "news_count": 0,
-      "score_change": null
+      "score_change": 0.0
     },
     {
       "sector": "Du lịch & giải trí",
@@ -3594,7 +3594,7 @@
       "leader_ratio_pct": 0.0,
       "news_score": null,
       "news_count": 0,
-      "score_change": 31.9
+      "score_change": 0.0
     },
     {
       "sector": "Chưa phân loại",
@@ -3610,11 +3610,11 @@
       "leader_ratio_pct": 25.0,
       "news_score": null,
       "news_count": 0,
-      "score_change": 25.8
+      "score_change": 0.0
     },
     {
       "sector": "Bất động sản",
-      "score": 67.1,
+      "score": 66.8,
       "status": "Đang cải thiện",
       "stock_count": 11,
       "return_5d_pct": -0.04,
@@ -3624,9 +3624,9 @@
       "breadth_ma50_pct": 72.7,
       "volume_ratio": 1.11,
       "leader_ratio_pct": 45.5,
-      "news_score": 32.2,
-      "news_count": 3,
-      "score_change": -15.3
+      "news_score": 29.4,
+      "news_count": 4,
+      "score_change": -0.3
     },
     {
       "sector": "Phân bón",
@@ -3642,7 +3642,7 @@
       "leader_ratio_pct": 0.0,
       "news_score": null,
       "news_count": 0,
-      "score_change": null
+      "score_change": 0.0
     },
     {
       "sector": "Dầu khí",
@@ -3658,7 +3658,7 @@
       "leader_ratio_pct": 28.6,
       "news_score": 50.0,
       "news_count": 2,
-      "score_change": -13.4
+      "score_change": 0.0
     },
     {
       "sector": "Điện & bất động sản",
@@ -3674,7 +3674,7 @@
       "leader_ratio_pct": 0.0,
       "news_score": null,
       "news_count": 0,
-      "score_change": null
+      "score_change": 0.0
     },
     {
       "sector": "Vật liệu & KCN",
@@ -3690,7 +3690,7 @@
       "leader_ratio_pct": 0.0,
       "news_score": null,
       "news_count": 0,
-      "score_change": null
+      "score_change": 0.0
     },
     {
       "sector": "Tiêu dùng",
@@ -3706,11 +3706,11 @@
       "leader_ratio_pct": 0.0,
       "news_score": null,
       "news_count": 0,
-      "score_change": 4.9
+      "score_change": 0.0
     },
     {
       "sector": "Công nghệ",
-      "score": 45.4,
+      "score": 45.5,
       "status": "Trung tính / tích lũy",
       "stock_count": 2,
       "return_5d_pct": -1.38,
@@ -3720,9 +3720,9 @@
       "breadth_ma50_pct": 50.0,
       "volume_ratio": 1.28,
       "leader_ratio_pct": 50.0,
-      "news_score": 53.0,
+      "news_score": 53.1,
       "news_count": 3,
-      "score_change": -4.6
+      "score_change": 0.1
     },
     {
       "sector": "Ngân hàng",
@@ -3737,8 +3737,8 @@
       "volume_ratio": 0.83,
       "leader_ratio_pct": 29.4,
       "news_score": 50.0,
-      "news_count": 4,
-      "score_change": -13.0
+      "news_count": 3,
+      "score_change": 0.0
     },
     {
       "sector": "Bảo hiểm",
@@ -3754,7 +3754,7 @@
       "leader_ratio_pct": 0.0,
       "news_score": null,
       "news_count": 0,
-      "score_change": -11.1
+      "score_change": 0.0
     },
     {
       "sector": "Khu công nghiệp",
@@ -3770,7 +3770,7 @@
       "leader_ratio_pct": 33.3,
       "news_score": null,
       "news_count": 0,
-      "score_change": null
+      "score_change": 0.0
     },
     {
       "sector": "Vận tải biển",
@@ -3786,7 +3786,7 @@
       "leader_ratio_pct": 0.0,
       "news_score": null,
       "news_count": 0,
-      "score_change": null
+      "score_change": 0.0
     },
     {
       "sector": "Bán lẻ",
@@ -3802,7 +3802,7 @@
       "leader_ratio_pct": 0.0,
       "news_score": null,
       "news_count": 0,
-      "score_change": 11.9
+      "score_change": 0.0
     },
     {
       "sector": "Chứng khoán",
@@ -3818,7 +3818,7 @@
       "leader_ratio_pct": 22.2,
       "news_score": null,
       "news_count": 0,
-      "score_change": -39.3
+      "score_change": 0.0
     },
     {
       "sector": "Nhựa & bao bì",
@@ -3834,7 +3834,7 @@
       "leader_ratio_pct": 0.0,
       "news_score": null,
       "news_count": 0,
-      "score_change": null
+      "score_change": 0.0
     },
     {
       "sector": "Hạ tầng",
@@ -3850,7 +3850,7 @@
       "leader_ratio_pct": 0.0,
       "news_score": null,
       "news_count": 0,
-      "score_change": null
+      "score_change": 0.0
     },
     {
       "sector": "Hàng không",
@@ -3866,7 +3866,7 @@
       "leader_ratio_pct": 0.0,
       "news_score": 50.0,
       "news_count": 1,
-      "score_change": 12.3
+      "score_change": 0.0
     },
     {
       "sector": "Thiết bị điện",
@@ -3882,7 +3882,7 @@
       "leader_ratio_pct": 0.0,
       "news_score": null,
       "news_count": 0,
-      "score_change": null
+      "score_change": 0.0
     },
     {
       "sector": "Nông nghiệp",
@@ -3898,7 +3898,7 @@
       "leader_ratio_pct": 0.0,
       "news_score": null,
       "news_count": 0,
-      "score_change": null
+      "score_change": 0.0
     },
     {
       "sector": "Xây dựng & hạ tầng",
@@ -3914,7 +3914,7 @@
       "leader_ratio_pct": 0.0,
       "news_score": null,
       "news_count": 0,
-      "score_change": null
+      "score_change": 0.0
     },
     {
       "sector": "Thép",
@@ -3928,9 +3928,9 @@
       "breadth_ma50_pct": 0.0,
       "volume_ratio": 0.98,
       "leader_ratio_pct": 0.0,
-      "news_score": 27.8,
+      "news_score": 27.9,
       "news_count": 2,
-      "score_change": 2.8
+      "score_change": 0.0
     },
     {
       "sector": "Cảng & logistics",
@@ -3946,7 +3946,7 @@
       "leader_ratio_pct": 0.0,
       "news_score": null,
       "news_count": 0,
-      "score_change": null
+      "score_change": 0.0
     },
     {
       "sector": "Vật liệu xây dựng",
@@ -3962,7 +3962,7 @@
       "leader_ratio_pct": 0.0,
       "news_score": null,
       "news_count": 0,
-      "score_change": null
+      "score_change": 0.0
     },
     {
       "sector": "Điện & hạ tầng",
@@ -3978,7 +3978,7 @@
       "leader_ratio_pct": 0.0,
       "news_score": null,
       "news_count": 0,
-      "score_change": null
+      "score_change": 0.0
     },
     {
       "sector": "Thủy sản",
@@ -3994,7 +3994,7 @@
       "leader_ratio_pct": 0.0,
       "news_score": null,
       "news_count": 0,
-      "score_change": null
+      "score_change": 0.0
     },
     {
       "sector": "Điện",
@@ -4010,7 +4010,7 @@
       "leader_ratio_pct": 0.0,
       "news_score": null,
       "news_count": 0,
-      "score_change": -16.4
+      "score_change": 0.0
     }
   ],
   "news_digest": {
