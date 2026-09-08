@@ -11,7 +11,7 @@ from features import build_features
 from market_context import analyze_market_context
 from market_scanner import build_universe, categorize_opportunities, fast_snapshot, rank_fast_snapshots
 from model_monitor import attach_quality_reports, summarize_model_health
-from models import quick_train_predict
+from models import predict_price_range, quick_train_predict, train_quantile_models
 from news_utils import fetch_all_news
 from paper_trading import process_journal
 from scan_watchlist import MIN_AVG_TRADE_VALUE, fetch_history_standalone
@@ -157,7 +157,7 @@ def main():
         "universe_stats": {"requested": len(universe), "downloaded": len(histories),
                            "liquid": len(fast_ranking), "deep_analyzed": len(results)},
         "fast_ranking": fast_ranking[:50], "opportunities": opportunities,
-        "results": results, "sector_rankings": sector_rankings, "news_digest": news_digest,
+        "results": results, "forecast_top5": forecast_top5, "sector_rankings": sector_rankings, "news_digest": news_digest,
         "model_health": summarize_model_health(results),
     }
     with open("signals_latest.json", "w", encoding="utf-8") as handle:
