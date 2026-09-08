@@ -1,6 +1,6 @@
 {
   "schema_version": 9,
-  "scanned_at": "2026-09-07T14:27:38.713566",
+  "scanned_at": "2026-09-08T00:36:00.354342",
   "watchlist": [
     "ACB",
     "BID",
@@ -302,8 +302,8 @@
       "ret_20d_pct": 9.515260323159769,
       "above_ma20": 1.0,
       "above_ma50": 1.0,
-      "volume_ratio": 0.9709828499441162,
-      "avg_trade_value_bn": 68.62,
+      "volume_ratio": 0.9711125102067049,
+      "avg_trade_value_bn": 68.63,
       "fast_score": 77.6
     },
     {
@@ -401,7 +401,7 @@
       "ret_20d_pct": 2.386190556777801,
       "above_ma20": 1.0,
       "above_ma50": 1.0,
-      "volume_ratio": 0.9418098842844832,
+      "volume_ratio": 0.9418484260289336,
       "avg_trade_value_bn": 134.71,
       "fast_score": 71.0
     },
@@ -412,7 +412,7 @@
       "ret_20d_pct": 0.4761904761904745,
       "above_ma20": 1.0,
       "above_ma50": 1.0,
-      "volume_ratio": 1.9462226123855415,
+      "volume_ratio": 1.9464429391226175,
       "avg_trade_value_bn": 2.52,
       "fast_score": 70.4
     },
@@ -691,7 +691,7 @@
         "ret_20d_pct": 0.4761904761904745,
         "above_ma20": 1.0,
         "above_ma50": 1.0,
-        "volume_ratio": 1.9462226123855415,
+        "volume_ratio": 1.9464429391226175,
         "avg_trade_value_bn": 2.52,
         "fast_score": 70.4,
         "change_pct": -3.2110091743119185,
@@ -703,7 +703,7 @@
         "volume_spike": false,
         "relative_strength": -0.020670697154265616,
         "sector": "Bất động sản",
-        "sector_score": 66.8,
+        "sector_score": 68.6,
         "trade_plan": {
           "action": "CHỜ ĐIỂM MUA",
           "reason": "Chưa đồng thời thỏa vị trí giá và sức mạnh ngành.",
@@ -726,6 +726,21 @@
           "volume_ratio": 1.25,
           "is_chasing": false
         },
+        "forecast_t5": {
+          "probability_up": 0.45481024809793774,
+          "expected_return_pct": -0.09961251015485142,
+          "downside_pct": -2.954812326970031,
+          "upside_pct": 5.294744717926571,
+          "price_low": 10.238267299504662,
+          "price_mid": 10.539490880178663,
+          "price_high": 11.108595567741254,
+          "validation_accuracy": 0.6212121212121212,
+          "baseline_accuracy": 0.6212121212121212,
+          "brier_score": 0.25928326066273905,
+          "n_test": 66,
+          "confidence": "thấp",
+          "horizon_sessions": 5
+        },
         "model_quality": {
           "ticker": "AGG",
           "gate": "CAUTION",
@@ -745,7 +760,7 @@
             "Paper T+5 mới có 0/8 mẫu"
           ]
         },
-        "opportunity_score": 63.8
+        "opportunity_score": 64.1
       }
     ],
     "watch": [
@@ -768,7 +783,7 @@
         "volume_spike": false,
         "relative_strength": 0.14698119118727782,
         "sector": "Bất động sản",
-        "sector_score": 66.8,
+        "sector_score": 68.6,
         "trade_plan": {
           "action": "KHÔNG MUA ĐUỔI",
           "reason": "Giá đã đi xa hơn vùng mua trên 0,5 ATR.",
@@ -791,6 +806,21 @@
           "volume_ratio": 1.08,
           "is_chasing": true
         },
+        "forecast_t5": {
+          "probability_up": 0.9213438863800423,
+          "expected_return_pct": 3.0911725788622015,
+          "downside_pct": -1.6660737673611266,
+          "upside_pct": 5.495814036490057,
+          "price_low": 25.075151189322913,
+          "price_mid": 26.28824900760986,
+          "price_high": 26.901432579304966,
+          "validation_accuracy": 0.7575757575757576,
+          "baseline_accuracy": 0.5909090909090909,
+          "brier_score": 0.21450457628830066,
+          "n_test": 66,
+          "confidence": "cao",
+          "horizon_sessions": 5
+        },
         "model_quality": {
           "ticker": "NLG",
           "gate": "CAUTION",
@@ -810,7 +840,7 @@
             "Paper T+5 mới có 0/8 mẫu"
           ]
         },
-        "opportunity_score": 72.8
+        "opportunity_score": 73.1
       },
       {
         "ticker": "VPL",
@@ -854,6 +884,21 @@
           "volume_ratio": 3.05,
           "is_chasing": true
         },
+        "forecast_t5": {
+          "probability_up": 0.6717143356516789,
+          "expected_return_pct": 1.7343861375634273,
+          "downside_pct": -4.088772307233938,
+          "upside_pct": 22.894949318762105,
+          "price_low": 77.78400565883328,
+          "price_mid": 82.50658715756393,
+          "price_high": 99.66780389751605,
+          "validation_accuracy": 0.65,
+          "baseline_accuracy": 0.6166666666666667,
+          "brier_score": 0.26189493318233936,
+          "n_test": 60,
+          "confidence": "trung bình",
+          "horizon_sessions": 5
+        },
         "model_quality": {
           "ticker": "VPL",
           "gate": "CAUTION",
@@ -894,7 +939,7 @@
         "volume_spike": false,
         "relative_strength": 0.0393822128986443,
         "sector": "Bất động sản",
-        "sector_score": 66.8,
+        "sector_score": 68.6,
         "trade_plan": {
           "action": "MUA THĂM DÒ",
           "reason": "Giá trong vùng mua và ngành không yếu.",
@@ -917,6 +962,21 @@
           "volume_ratio": 0.85,
           "is_chasing": false
         },
+        "forecast_t5": {
+          "probability_up": 0.9138797801269077,
+          "expected_return_pct": 5.0687933553286015,
+          "downside_pct": -0.8759374441573832,
+          "upside_pct": 11.872473419331406,
+          "price_low": 11.3992671939219,
+          "price_mid": 12.082911235862788,
+          "price_high": 12.86533444322311,
+          "validation_accuracy": 0.5606060606060606,
+          "baseline_accuracy": 0.4393939393939394,
+          "brier_score": 0.2888730280797861,
+          "n_test": 66,
+          "confidence": "cao",
+          "horizon_sessions": 5
+        },
         "model_quality": {
           "ticker": "DXG",
           "gate": "CAUTION",
@@ -935,7 +995,7 @@
             "Paper T+5 mới có 0/8 mẫu"
           ]
         },
-        "opportunity_score": 66.0
+        "opportunity_score": 66.4
       },
       {
         "ticker": "MSN",
@@ -979,6 +1039,21 @@
           "volume_ratio": 0.89,
           "is_chasing": false
         },
+        "forecast_t5": {
+          "probability_up": 0.8124830457392582,
+          "expected_return_pct": 2.7851070581829624,
+          "downside_pct": -3.1258384259548015,
+          "upside_pct": 4.623276375440715,
+          "price_low": 66.45567483979501,
+          "price_mid": 70.5105834419135,
+          "price_high": 71.77156759355232,
+          "validation_accuracy": 0.4393939393939394,
+          "baseline_accuracy": 0.5303030303030303,
+          "brier_score": 0.2888997793464995,
+          "n_test": 66,
+          "confidence": "thấp",
+          "horizon_sessions": 5
+        },
         "model_quality": {
           "ticker": "MSN",
           "gate": "CAUTION",
@@ -1000,6 +1075,84 @@
           ]
         },
         "opportunity_score": 65.0
+      },
+      {
+        "ticker": "TCH",
+        "price": 12.2,
+        "ret_5d_pct": -0.9740259740259827,
+        "ret_20d_pct": 9.515260323159769,
+        "above_ma20": 1.0,
+        "above_ma50": 1.0,
+        "volume_ratio": 0.9711125102067049,
+        "avg_trade_value_bn": 68.63,
+        "fast_score": 77.6,
+        "change_pct": 0.0,
+        "probability_t1": 0.564256357935002,
+        "quick_accuracy": 0.6268656716417911,
+        "quick_baseline_accuracy": 0.5671641791044776,
+        "brier_score": 0.2512751285429178,
+        "n_test": 67,
+        "volume_spike": false,
+        "relative_strength": 0.06972000131542733,
+        "sector": "Bất động sản",
+        "sector_score": 68.6,
+        "trade_plan": {
+          "action": "KHÔNG MUA ĐUỔI",
+          "reason": "Giá đã đi xa hơn vùng mua trên 0,5 ATR.",
+          "setup": "Chờ giá về vùng hỗ trợ",
+          "current_price": 12.2,
+          "entry_low": 11.51,
+          "entry_high": 11.81,
+          "entry_reference": 11.66,
+          "stop_loss": 10.3,
+          "stop_basis": "Hỗ trợ kỹ thuật − 0,3 ATR",
+          "tp1": 13.02,
+          "tp2": 14.38,
+          "trailing_stop": 11.66,
+          "atr": 0.51,
+          "atr_pct": 4.17,
+          "risk_per_share": 1.36,
+          "risk_pct": 11.68,
+          "reward_risk_tp1": 1.0,
+          "reward_risk_tp2": 2.0,
+          "volume_ratio": 0.6,
+          "is_chasing": true
+        },
+        "forecast_t5": {
+          "probability_up": 0.4619252249524605,
+          "expected_return_pct": -0.3608006045130782,
+          "downside_pct": -5.593477862929546,
+          "upside_pct": 8.822399989393084,
+          "price_low": 11.517595700722595,
+          "price_mid": 12.155982326249404,
+          "price_high": 13.276332798705957,
+          "validation_accuracy": 0.5151515151515151,
+          "baseline_accuracy": 0.5303030303030303,
+          "brier_score": 0.3063388831934107,
+          "n_test": 66,
+          "confidence": "thấp",
+          "horizon_sessions": 5
+        },
+        "model_quality": {
+          "ticker": "TCH",
+          "gate": "CAUTION",
+          "label": "🟡 Chờ kiểm định thêm",
+          "model_edge_pp": 5.97,
+          "quick_accuracy_pct": 62.7,
+          "baseline_accuracy_pct": 56.7,
+          "brier_score": 0.251,
+          "holdout_samples": 67,
+          "paper_t5": {
+            "count": 0,
+            "win_rate_pct": null,
+            "avg_return_pct": null
+          },
+          "reasons": [
+            "Brier Score chưa tốt hơn mốc 0,25",
+            "Paper T+5 mới có 0/8 mẫu"
+          ]
+        },
+        "opportunity_score": 64.1
       },
       {
         "ticker": "DPM",
@@ -1043,6 +1196,21 @@
           "volume_ratio": 1.3,
           "is_chasing": false
         },
+        "forecast_t5": {
+          "probability_up": 0.42778128188966574,
+          "expected_return_pct": -0.6645255823115291,
+          "downside_pct": -2.3578800954136345,
+          "upside_pct": 3.1353609053438545,
+          "price_low": 21.77419273872276,
+          "price_mid": 22.15181079514453,
+          "price_high": 22.99918548189168,
+          "validation_accuracy": 0.6212121212121212,
+          "baseline_accuracy": 0.5,
+          "brier_score": 0.2584464928097406,
+          "n_test": 66,
+          "confidence": "cao",
+          "horizon_sessions": 5
+        },
         "model_quality": {
           "ticker": "DPM",
           "gate": "CAUTION",
@@ -1063,69 +1231,6 @@
           ]
         },
         "opportunity_score": 63.9
-      },
-      {
-        "ticker": "TCH",
-        "price": 12.2,
-        "ret_5d_pct": -0.9740259740259827,
-        "ret_20d_pct": 9.515260323159769,
-        "above_ma20": 1.0,
-        "above_ma50": 1.0,
-        "volume_ratio": 0.9709828499441162,
-        "avg_trade_value_bn": 68.62,
-        "fast_score": 77.6,
-        "change_pct": 0.0,
-        "probability_t1": 0.564256357935002,
-        "quick_accuracy": 0.6268656716417911,
-        "quick_baseline_accuracy": 0.5671641791044776,
-        "brier_score": 0.2512751285429178,
-        "n_test": 67,
-        "volume_spike": false,
-        "relative_strength": 0.06972000131542733,
-        "sector": "Bất động sản",
-        "sector_score": 66.8,
-        "trade_plan": {
-          "action": "KHÔNG MUA ĐUỔI",
-          "reason": "Giá đã đi xa hơn vùng mua trên 0,5 ATR.",
-          "setup": "Chờ giá về vùng hỗ trợ",
-          "current_price": 12.2,
-          "entry_low": 11.51,
-          "entry_high": 11.81,
-          "entry_reference": 11.66,
-          "stop_loss": 10.3,
-          "stop_basis": "Hỗ trợ kỹ thuật − 0,3 ATR",
-          "tp1": 13.02,
-          "tp2": 14.38,
-          "trailing_stop": 11.66,
-          "atr": 0.51,
-          "atr_pct": 4.17,
-          "risk_per_share": 1.36,
-          "risk_pct": 11.68,
-          "reward_risk_tp1": 1.0,
-          "reward_risk_tp2": 2.0,
-          "volume_ratio": 0.6,
-          "is_chasing": true
-        },
-        "model_quality": {
-          "ticker": "TCH",
-          "gate": "CAUTION",
-          "label": "🟡 Chờ kiểm định thêm",
-          "model_edge_pp": 5.97,
-          "quick_accuracy_pct": 62.7,
-          "baseline_accuracy_pct": 56.7,
-          "brier_score": 0.251,
-          "holdout_samples": 67,
-          "paper_t5": {
-            "count": 0,
-            "win_rate_pct": null,
-            "avg_return_pct": null
-          },
-          "reasons": [
-            "Brier Score chưa tốt hơn mốc 0,25",
-            "Paper T+5 mới có 0/8 mẫu"
-          ]
-        },
-        "opportunity_score": 63.8
       },
       {
         "ticker": "HDB",
@@ -1168,6 +1273,21 @@
           "reward_risk_tp2": 2.0,
           "volume_ratio": 0.79,
           "is_chasing": false
+        },
+        "forecast_t5": {
+          "probability_up": 0.4001536058555336,
+          "expected_return_pct": 0.46366748683306264,
+          "downside_pct": -4.585578136113996,
+          "upside_pct": 2.211298494789329,
+          "price_low": 26.095844379772824,
+          "price_mid": 27.476813057648844,
+          "price_high": 27.954790138324885,
+          "validation_accuracy": 0.6818181818181818,
+          "baseline_accuracy": 0.4090909090909091,
+          "brier_score": 0.176661417545854,
+          "n_test": 66,
+          "confidence": "cao",
+          "horizon_sessions": 5
         },
         "model_quality": {
           "ticker": "HDB",
@@ -1232,6 +1352,21 @@
           "volume_ratio": 1.65,
           "is_chasing": false
         },
+        "forecast_t5": {
+          "probability_up": 0.8236009428284659,
+          "expected_return_pct": 4.91682207418231,
+          "downside_pct": -5.462932698659258,
+          "upside_pct": 12.778887514412055,
+          "price_low": 39.51649413196043,
+          "price_mid": 43.8552316270082,
+          "price_high": 47.141574981024235,
+          "validation_accuracy": 0.48484848484848486,
+          "baseline_accuracy": 0.5151515151515151,
+          "brier_score": 0.2768115239119687,
+          "n_test": 66,
+          "confidence": "thấp",
+          "horizon_sessions": 5
+        },
         "model_quality": {
           "ticker": "DGW",
           "gate": "BLOCK",
@@ -1295,6 +1430,21 @@
           "volume_ratio": 1.24,
           "is_chasing": false
         },
+        "forecast_t5": {
+          "probability_up": 0.3512406958599001,
+          "expected_return_pct": -0.2641754893339534,
+          "downside_pct": -1.8643198658018403,
+          "upside_pct": 1.8581171798021787,
+          "price_low": 14.622216339995525,
+          "price_mid": 14.860637852089242,
+          "price_high": 15.176859459790524,
+          "validation_accuracy": 0.5454545454545454,
+          "baseline_accuracy": 0.5303030303030303,
+          "brier_score": 0.3182383000391059,
+          "n_test": 66,
+          "confidence": "thấp",
+          "horizon_sessions": 5
+        },
         "model_quality": {
           "ticker": "VIB",
           "gate": "CAUTION",
@@ -1357,6 +1507,21 @@
           "reward_risk_tp2": 2.0,
           "volume_ratio": 0.71,
           "is_chasing": false
+        },
+        "forecast_t5": {
+          "probability_up": 0.47038708111544636,
+          "expected_return_pct": -0.25261226792165437,
+          "downside_pct": -3.21272677898128,
+          "upside_pct": 8.404312643067458,
+          "price_low": 20.180146466582404,
+          "price_mid": 20.797330342138334,
+          "price_high": 22.60229918607957,
+          "validation_accuracy": 0.4090909090909091,
+          "baseline_accuracy": 0.5151515151515151,
+          "brier_score": 0.34018512054626526,
+          "n_test": 66,
+          "confidence": "thấp",
+          "horizon_sessions": 5
         },
         "model_quality": {
           "ticker": "SSI",
@@ -1424,6 +1589,21 @@
           "volume_ratio": 0.86,
           "is_chasing": false
         },
+        "forecast_t5": {
+          "probability_up": 0.17166138182115073,
+          "expected_return_pct": -0.39759475553922197,
+          "downside_pct": -3.9540885769510883,
+          "upside_pct": 1.240172012453907,
+          "price_low": 30.926783478221754,
+          "price_mid": 32.07197448871637,
+          "price_high": 32.59933538801016,
+          "validation_accuracy": 0.4696969696969697,
+          "baseline_accuracy": 0.5,
+          "brier_score": 0.33050088757415114,
+          "n_test": 66,
+          "confidence": "thấp",
+          "horizon_sessions": 5
+        },
         "model_quality": {
           "ticker": "BAF",
           "gate": "BLOCK",
@@ -1488,6 +1668,21 @@
           "volume_ratio": 0.65,
           "is_chasing": true
         },
+        "forecast_t5": {
+          "probability_up": 0.557444375553338,
+          "expected_return_pct": -0.1985950430134934,
+          "downside_pct": -2.0036382351590936,
+          "upside_pct": 4.70459599594732,
+          "price_low": 75.06521311186813,
+          "price_mid": 76.44787619705166,
+          "price_high": 80.20372053289564,
+          "validation_accuracy": 0.6212121212121212,
+          "baseline_accuracy": 0.3939393939393939,
+          "brier_score": 0.24614952185591657,
+          "n_test": 66,
+          "confidence": "cao",
+          "horizon_sessions": 5
+        },
         "model_quality": {
           "ticker": "STB",
           "gate": "BLOCK",
@@ -1550,6 +1745,21 @@
           "reward_risk_tp2": 2.0,
           "volume_ratio": 0.78,
           "is_chasing": true
+        },
+        "forecast_t5": {
+          "probability_up": 0.22128828817026086,
+          "expected_return_pct": -1.1411336826431897,
+          "downside_pct": -4.357536134290594,
+          "upside_pct": 1.004468614363812,
+          "price_low": 17.07217980002913,
+          "price_mid": 17.646307637648192,
+          "price_high": 18.02929764766394,
+          "validation_accuracy": 0.45454545454545453,
+          "baseline_accuracy": 0.6212121212121212,
+          "brier_score": 0.37466675533251076,
+          "n_test": 66,
+          "confidence": "thấp",
+          "horizon_sessions": 5
         },
         "model_quality": {
           "ticker": "SSB",
@@ -1615,6 +1825,21 @@
           "volume_ratio": 0.89,
           "is_chasing": true
         },
+        "forecast_t5": {
+          "probability_up": 0.3304468740441244,
+          "expected_return_pct": -1.7069928161743175,
+          "downside_pct": -7.194598430537417,
+          "upside_pct": 3.232533998627643,
+          "price_low": 25.335874628463287,
+          "price_mid": 26.833990961184412,
+          "price_high": 28.182481781625345,
+          "validation_accuracy": 0.5606060606060606,
+          "baseline_accuracy": 0.5909090909090909,
+          "brier_score": 0.27494445639294407,
+          "n_test": 66,
+          "confidence": "thấp",
+          "horizon_sessions": 5
+        },
         "model_quality": {
           "ticker": "VPB",
           "gate": "BLOCK",
@@ -1679,6 +1904,21 @@
           "volume_ratio": 0.61,
           "is_chasing": false
         },
+        "forecast_t5": {
+          "probability_up": 0.6915552163516309,
+          "expected_return_pct": 0.01859920847875419,
+          "downside_pct": -4.3507269804312765,
+          "upside_pct": 4.9455418236242705,
+          "price_low": 30.51211809324242,
+          "price_mid": 31.905933147504722,
+          "price_high": 33.477627841736144,
+          "validation_accuracy": 0.45454545454545453,
+          "baseline_accuracy": 0.48484848484848486,
+          "brier_score": 0.3184589011706339,
+          "n_test": 66,
+          "confidence": "thấp",
+          "horizon_sessions": 5
+        },
         "model_quality": {
           "ticker": "TCB",
           "gate": "BLOCK",
@@ -1723,7 +1963,7 @@
       "volume_spike": false,
       "relative_strength": 0.08820376172019317,
       "sector": "Bất động sản",
-      "sector_score": 66.8,
+      "sector_score": 68.6,
       "trade_plan": {
         "action": "KHÔNG MUA ĐUỔI",
         "reason": "Giá đã đi xa hơn vùng mua trên 0,5 ATR.",
@@ -1745,6 +1985,21 @@
         "reward_risk_tp2": 2.0,
         "volume_ratio": 0.97,
         "is_chasing": true
+      },
+      "forecast_t5": {
+        "probability_up": 0.6246128714259404,
+        "expected_return_pct": 3.333226061000891,
+        "downside_pct": -2.720131780670606,
+        "upside_pct": 16.173819926396998,
+        "price_low": 238.335677137357,
+        "price_mid": 253.16640384945217,
+        "price_high": 284.62585881967266,
+        "validation_accuracy": 0.5151515151515151,
+        "baseline_accuracy": 0.5303030303030303,
+        "brier_score": 0.34971166825088024,
+        "n_test": 66,
+        "confidence": "thấp",
+        "horizon_sessions": 5
       },
       "model_quality": {
         "ticker": "VIC",
@@ -1809,6 +2064,21 @@
         "volume_ratio": 0.89,
         "is_chasing": true
       },
+      "forecast_t5": {
+        "probability_up": 0.3304468740441244,
+        "expected_return_pct": -1.7069928161743175,
+        "downside_pct": -7.194598430537417,
+        "upside_pct": 3.232533998627643,
+        "price_low": 25.335874628463287,
+        "price_mid": 26.833990961184412,
+        "price_high": 28.182481781625345,
+        "validation_accuracy": 0.5606060606060606,
+        "baseline_accuracy": 0.5909090909090909,
+        "brier_score": 0.27494445639294407,
+        "n_test": 66,
+        "confidence": "thấp",
+        "horizon_sessions": 5
+      },
       "model_quality": {
         "ticker": "VPB",
         "gate": "BLOCK",
@@ -1872,6 +2142,21 @@
         "volume_ratio": 0.65,
         "is_chasing": true
       },
+      "forecast_t5": {
+        "probability_up": 0.557444375553338,
+        "expected_return_pct": -0.1985950430134934,
+        "downside_pct": -2.0036382351590936,
+        "upside_pct": 4.70459599594732,
+        "price_low": 75.06521311186813,
+        "price_mid": 76.44787619705166,
+        "price_high": 80.20372053289564,
+        "validation_accuracy": 0.6212121212121212,
+        "baseline_accuracy": 0.3939393939393939,
+        "brier_score": 0.24614952185591657,
+        "n_test": 66,
+        "confidence": "cao",
+        "horizon_sessions": 5
+      },
       "model_quality": {
         "ticker": "STB",
         "gate": "BLOCK",
@@ -1933,6 +2218,21 @@
         "reward_risk_tp2": 2.0,
         "volume_ratio": 2.5,
         "is_chasing": true
+      },
+      "forecast_t5": {
+        "probability_up": 0.20432153066562875,
+        "expected_return_pct": -3.8529913419301134,
+        "downside_pct": -6.3473718605456115,
+        "upside_pct": 0.24517980904121753,
+        "price_low": 44.01673522554356,
+        "price_mid": 45.18909406929285,
+        "price_high": 47.11523451024937,
+        "validation_accuracy": 0.4393939393939394,
+        "baseline_accuracy": 0.5909090909090909,
+        "brier_score": 0.3377646466302386,
+        "n_test": 66,
+        "confidence": "thấp",
+        "horizon_sessions": 5
       },
       "model_quality": {
         "ticker": "DGC",
@@ -1997,6 +2297,21 @@
         "volume_ratio": 0.78,
         "is_chasing": true
       },
+      "forecast_t5": {
+        "probability_up": 0.22128828817026086,
+        "expected_return_pct": -1.1411336826431897,
+        "downside_pct": -4.357536134290594,
+        "upside_pct": 1.004468614363812,
+        "price_low": 17.07217980002913,
+        "price_mid": 17.646307637648192,
+        "price_high": 18.02929764766394,
+        "validation_accuracy": 0.45454545454545453,
+        "baseline_accuracy": 0.6212121212121212,
+        "brier_score": 0.37466675533251076,
+        "n_test": 66,
+        "confidence": "thấp",
+        "horizon_sessions": 5
+      },
       "model_quality": {
         "ticker": "SSB",
         "gate": "BLOCK",
@@ -2060,6 +2375,21 @@
         "volume_ratio": 8.57,
         "is_chasing": true
       },
+      "forecast_t5": {
+        "probability_up": 0.30385892804433945,
+        "expected_return_pct": -0.7606205156925199,
+        "downside_pct": -5.986669779565568,
+        "upside_pct": 12.547181324191278,
+        "price_low": 8.367186389618665,
+        "price_mid": 8.832304774103365,
+        "price_high": 10.016699137853024,
+        "validation_accuracy": 0.5151515151515151,
+        "baseline_accuracy": 0.5303030303030303,
+        "brier_score": 0.2727665701116787,
+        "n_test": 66,
+        "confidence": "thấp",
+        "horizon_sessions": 5
+      },
       "model_quality": {
         "ticker": "AAS",
         "gate": "BLOCK",
@@ -2099,7 +2429,7 @@
       "volume_spike": false,
       "relative_strength": 0.14698119118727782,
       "sector": "Bất động sản",
-      "sector_score": 66.8,
+      "sector_score": 68.6,
       "trade_plan": {
         "action": "KHÔNG MUA ĐUỔI",
         "reason": "Giá đã đi xa hơn vùng mua trên 0,5 ATR.",
@@ -2121,6 +2451,21 @@
         "reward_risk_tp2": 2.0,
         "volume_ratio": 1.08,
         "is_chasing": true
+      },
+      "forecast_t5": {
+        "probability_up": 0.9213438863800423,
+        "expected_return_pct": 3.0911725788622015,
+        "downside_pct": -1.6660737673611266,
+        "upside_pct": 5.495814036490057,
+        "price_low": 25.075151189322913,
+        "price_mid": 26.28824900760986,
+        "price_high": 26.901432579304966,
+        "validation_accuracy": 0.7575757575757576,
+        "baseline_accuracy": 0.5909090909090909,
+        "brier_score": 0.21450457628830066,
+        "n_test": 66,
+        "confidence": "cao",
+        "horizon_sessions": 5
       },
       "model_quality": {
         "ticker": "NLG",
@@ -2161,7 +2506,7 @@
       "volume_spike": true,
       "relative_strength": -0.004638651065508759,
       "sector": "Bất động sản",
-      "sector_score": 66.8,
+      "sector_score": 68.6,
       "trade_plan": {
         "action": "KHÔNG MUA ĐUỔI",
         "reason": "Giá đã đi xa hơn vùng mua trên 0,5 ATR.",
@@ -2183,6 +2528,21 @@
         "reward_risk_tp2": 2.0,
         "volume_ratio": 2.06,
         "is_chasing": true
+      },
+      "forecast_t5": {
+        "probability_up": 0.9499845068455426,
+        "expected_return_pct": 5.804969204344374,
+        "downside_pct": -4.846668762863722,
+        "upside_pct": 15.622053586242169,
+        "price_low": 25.691399434026795,
+        "price_mid": 28.56734168517298,
+        "price_high": 31.217954468285388,
+        "validation_accuracy": 0.4,
+        "baseline_accuracy": 0.5846153846153846,
+        "brier_score": 0.38208855642699835,
+        "n_test": 65,
+        "confidence": "thấp",
+        "horizon_sessions": 5
       },
       "model_quality": {
         "ticker": "VRE",
@@ -2224,7 +2584,7 @@
       "volume_spike": false,
       "relative_strength": 0.004439375324228001,
       "sector": "Công nghệ",
-      "sector_score": 45.5,
+      "sector_score": 46.4,
       "trade_plan": {
         "action": "KHÔNG MUA ĐUỔI",
         "reason": "Giá đã đi xa hơn vùng mua trên 0,5 ATR.",
@@ -2246,6 +2606,21 @@
         "reward_risk_tp2": 2.0,
         "volume_ratio": 1.3,
         "is_chasing": true
+      },
+      "forecast_t5": {
+        "probability_up": 0.5224836918885577,
+        "expected_return_pct": 1.9996385049840082,
+        "downside_pct": -4.368037028008928,
+        "upside_pct": 4.958122846841801,
+        "price_low": 69.23754119172153,
+        "price_mid": 73.84773827760843,
+        "price_high": 75.98968094111348,
+        "validation_accuracy": 0.5303030303030303,
+        "baseline_accuracy": 0.5,
+        "brier_score": 0.28701306438908497,
+        "n_test": 66,
+        "confidence": "trung bình",
+        "horizon_sessions": 5
       },
       "model_quality": {
         "ticker": "FPT",
@@ -2309,6 +2684,21 @@
         "volume_ratio": 1.65,
         "is_chasing": false
       },
+      "forecast_t5": {
+        "probability_up": 0.8236009428284659,
+        "expected_return_pct": 4.91682207418231,
+        "downside_pct": -5.462932698659258,
+        "upside_pct": 12.778887514412055,
+        "price_low": 39.51649413196043,
+        "price_mid": 43.8552316270082,
+        "price_high": 47.141574981024235,
+        "validation_accuracy": 0.48484848484848486,
+        "baseline_accuracy": 0.5151515151515151,
+        "brier_score": 0.2768115239119687,
+        "n_test": 66,
+        "confidence": "thấp",
+        "horizon_sessions": 5
+      },
       "model_quality": {
         "ticker": "DGW",
         "gate": "BLOCK",
@@ -2370,6 +2760,21 @@
         "reward_risk_tp2": 2.0,
         "volume_ratio": 0.61,
         "is_chasing": false
+      },
+      "forecast_t5": {
+        "probability_up": 0.6915552163516309,
+        "expected_return_pct": 0.01859920847875419,
+        "downside_pct": -4.3507269804312765,
+        "upside_pct": 4.9455418236242705,
+        "price_low": 30.51211809324242,
+        "price_mid": 31.905933147504722,
+        "price_high": 33.477627841736144,
+        "validation_accuracy": 0.45454545454545453,
+        "baseline_accuracy": 0.48484848484848486,
+        "brier_score": 0.3184589011706339,
+        "n_test": 66,
+        "confidence": "thấp",
+        "horizon_sessions": 5
       },
       "model_quality": {
         "ticker": "TCB",
@@ -2434,6 +2839,21 @@
         "volume_ratio": 1.3,
         "is_chasing": false
       },
+      "forecast_t5": {
+        "probability_up": 0.42778128188966574,
+        "expected_return_pct": -0.6645255823115291,
+        "downside_pct": -2.3578800954136345,
+        "upside_pct": 3.1353609053438545,
+        "price_low": 21.77419273872276,
+        "price_mid": 22.15181079514453,
+        "price_high": 22.99918548189168,
+        "validation_accuracy": 0.6212121212121212,
+        "baseline_accuracy": 0.5,
+        "brier_score": 0.2584464928097406,
+        "n_test": 66,
+        "confidence": "cao",
+        "horizon_sessions": 5
+      },
       "model_quality": {
         "ticker": "DPM",
         "gate": "CAUTION",
@@ -2495,6 +2915,21 @@
         "reward_risk_tp2": 2.0,
         "volume_ratio": 0.96,
         "is_chasing": false
+      },
+      "forecast_t5": {
+        "probability_up": 0.5302573444835285,
+        "expected_return_pct": 0.0003706911990999568,
+        "downside_pct": -2.2323834282054227,
+        "upside_pct": 4.662508119760221,
+        "price_low": 31.090102069830678,
+        "price_mid": 31.800117879801313,
+        "price_high": 33.28267758208375,
+        "validation_accuracy": 0.45454545454545453,
+        "baseline_accuracy": 0.5757575757575758,
+        "brier_score": 0.35607600375383647,
+        "n_test": 66,
+        "confidence": "thấp",
+        "horizon_sessions": 5
       },
       "model_quality": {
         "ticker": "DCM",
@@ -2559,6 +2994,21 @@
         "volume_ratio": 2.16,
         "is_chasing": true
       },
+      "forecast_t5": {
+        "probability_up": 0.5280087393633579,
+        "expected_return_pct": 0.5492219497465832,
+        "downside_pct": -1.6007125520208672,
+        "upside_pct": 3.0395603581612893,
+        "price_low": 60.909158930299085,
+        "price_mid": 62.23996838689313,
+        "price_high": 63.781487861701834,
+        "validation_accuracy": 0.5757575757575758,
+        "baseline_accuracy": 0.5303030303030303,
+        "brier_score": 0.3105456012311669,
+        "n_test": 66,
+        "confidence": "trung bình",
+        "horizon_sessions": 5
+      },
       "model_quality": {
         "ticker": "PHR",
         "gate": "BLOCK",
@@ -2622,6 +3072,21 @@
         "volume_ratio": 1.08,
         "is_chasing": false
       },
+      "forecast_t5": {
+        "probability_up": 0.14420459471823402,
+        "expected_return_pct": -0.9220768262711059,
+        "downside_pct": -0.9671840917566017,
+        "upside_pct": 0.8727952376018878,
+        "price_low": 22.777547658895983,
+        "price_mid": 22.787922329957645,
+        "price_high": 23.200742904648433,
+        "validation_accuracy": 0.49230769230769234,
+        "baseline_accuracy": 0.6307692307692307,
+        "brier_score": 0.31483562126647735,
+        "n_test": 65,
+        "confidence": "thấp",
+        "horizon_sessions": 5
+      },
       "model_quality": {
         "ticker": "SBT",
         "gate": "BLOCK",
@@ -2650,8 +3115,8 @@
       "ret_20d_pct": 9.515260323159769,
       "above_ma20": 1.0,
       "above_ma50": 1.0,
-      "volume_ratio": 0.9709828499441162,
-      "avg_trade_value_bn": 68.62,
+      "volume_ratio": 0.9711125102067049,
+      "avg_trade_value_bn": 68.63,
       "fast_score": 77.6,
       "change_pct": 0.0,
       "probability_t1": 0.564256357935002,
@@ -2662,7 +3127,7 @@
       "volume_spike": false,
       "relative_strength": 0.06972000131542733,
       "sector": "Bất động sản",
-      "sector_score": 66.8,
+      "sector_score": 68.6,
       "trade_plan": {
         "action": "KHÔNG MUA ĐUỔI",
         "reason": "Giá đã đi xa hơn vùng mua trên 0,5 ATR.",
@@ -2684,6 +3149,21 @@
         "reward_risk_tp2": 2.0,
         "volume_ratio": 0.6,
         "is_chasing": true
+      },
+      "forecast_t5": {
+        "probability_up": 0.4619252249524605,
+        "expected_return_pct": -0.3608006045130782,
+        "downside_pct": -5.593477862929546,
+        "upside_pct": 8.822399989393084,
+        "price_low": 11.517595700722595,
+        "price_mid": 12.155982326249404,
+        "price_high": 13.276332798705957,
+        "validation_accuracy": 0.5151515151515151,
+        "baseline_accuracy": 0.5303030303030303,
+        "brier_score": 0.3063388831934107,
+        "n_test": 66,
+        "confidence": "thấp",
+        "horizon_sessions": 5
       },
       "model_quality": {
         "ticker": "TCH",
@@ -2747,6 +3227,21 @@
         "volume_ratio": 0.79,
         "is_chasing": false
       },
+      "forecast_t5": {
+        "probability_up": 0.4001536058555336,
+        "expected_return_pct": 0.46366748683306264,
+        "downside_pct": -4.585578136113996,
+        "upside_pct": 2.211298494789329,
+        "price_low": 26.095844379772824,
+        "price_mid": 27.476813057648844,
+        "price_high": 27.954790138324885,
+        "validation_accuracy": 0.6818181818181818,
+        "baseline_accuracy": 0.4090909090909091,
+        "brier_score": 0.176661417545854,
+        "n_test": 66,
+        "confidence": "cao",
+        "horizon_sessions": 5
+      },
       "model_quality": {
         "ticker": "HDB",
         "gate": "CAUTION",
@@ -2808,6 +3303,21 @@
         "reward_risk_tp2": 2.0,
         "volume_ratio": 0.71,
         "is_chasing": false
+      },
+      "forecast_t5": {
+        "probability_up": 0.39774053514266056,
+        "expected_return_pct": -0.5955234634137193,
+        "downside_pct": -3.046646299812747,
+        "upside_pct": 5.168472222625961,
+        "price_low": 80.27737686375504,
+        "price_mid": 82.30690657229344,
+        "price_high": 87.07949500033429,
+        "validation_accuracy": 0.5757575757575758,
+        "baseline_accuracy": 0.5,
+        "brier_score": 0.27476021963549824,
+        "n_test": 66,
+        "confidence": "cao",
+        "horizon_sessions": 5
       },
       "model_quality": {
         "ticker": "GAS",
@@ -2871,6 +3381,21 @@
         "volume_ratio": 1.7,
         "is_chasing": false
       },
+      "forecast_t5": {
+        "probability_up": 0.2701612710453573,
+        "expected_return_pct": -1.2275307155310895,
+        "downside_pct": -2.6250677729343286,
+        "upside_pct": 2.3760036501195696,
+        "price_low": 25.706982107945336,
+        "price_mid": 26.075931891099792,
+        "price_high": 27.027264963631563,
+        "validation_accuracy": 0.5606060606060606,
+        "baseline_accuracy": 0.45454545454545453,
+        "brier_score": 0.2765562829673051,
+        "n_test": 66,
+        "confidence": "cao",
+        "horizon_sessions": 5
+      },
       "model_quality": {
         "ticker": "HCM",
         "gate": "CAUTION",
@@ -2932,6 +3457,21 @@
         "reward_risk_tp2": 2.0,
         "volume_ratio": 0.86,
         "is_chasing": false
+      },
+      "forecast_t5": {
+        "probability_up": 0.17166138182115073,
+        "expected_return_pct": -0.39759475553922197,
+        "downside_pct": -3.9540885769510883,
+        "upside_pct": 1.240172012453907,
+        "price_low": 30.926783478221754,
+        "price_mid": 32.07197448871637,
+        "price_high": 32.59933538801016,
+        "validation_accuracy": 0.4696969696969697,
+        "baseline_accuracy": 0.5,
+        "brier_score": 0.33050088757415114,
+        "n_test": 66,
+        "confidence": "thấp",
+        "horizon_sessions": 5
       },
       "model_quality": {
         "ticker": "BAF",
@@ -2996,6 +3536,21 @@
         "volume_ratio": 0.89,
         "is_chasing": false
       },
+      "forecast_t5": {
+        "probability_up": 0.8124830457392582,
+        "expected_return_pct": 2.7851070581829624,
+        "downside_pct": -3.1258384259548015,
+        "upside_pct": 4.623276375440715,
+        "price_low": 66.45567483979501,
+        "price_mid": 70.5105834419135,
+        "price_high": 71.77156759355232,
+        "validation_accuracy": 0.4393939393939394,
+        "baseline_accuracy": 0.5303030303030303,
+        "brier_score": 0.2888997793464995,
+        "n_test": 66,
+        "confidence": "thấp",
+        "horizon_sessions": 5
+      },
       "model_quality": {
         "ticker": "MSN",
         "gate": "CAUTION",
@@ -3059,6 +3614,21 @@
         "volume_ratio": 3.05,
         "is_chasing": true
       },
+      "forecast_t5": {
+        "probability_up": 0.6717143356516789,
+        "expected_return_pct": 1.7343861375634273,
+        "downside_pct": -4.088772307233938,
+        "upside_pct": 22.894949318762105,
+        "price_low": 77.78400565883328,
+        "price_mid": 82.50658715756393,
+        "price_high": 99.66780389751605,
+        "validation_accuracy": 0.65,
+        "baseline_accuracy": 0.6166666666666667,
+        "brier_score": 0.26189493318233936,
+        "n_test": 60,
+        "confidence": "trung bình",
+        "horizon_sessions": 5
+      },
       "model_quality": {
         "ticker": "VPL",
         "gate": "CAUTION",
@@ -3098,7 +3668,7 @@
       "volume_spike": false,
       "relative_strength": 0.0393822128986443,
       "sector": "Bất động sản",
-      "sector_score": 66.8,
+      "sector_score": 68.6,
       "trade_plan": {
         "action": "MUA THĂM DÒ",
         "reason": "Giá trong vùng mua và ngành không yếu.",
@@ -3120,6 +3690,21 @@
         "reward_risk_tp2": 2.0,
         "volume_ratio": 0.85,
         "is_chasing": false
+      },
+      "forecast_t5": {
+        "probability_up": 0.9138797801269077,
+        "expected_return_pct": 5.0687933553286015,
+        "downside_pct": -0.8759374441573832,
+        "upside_pct": 11.872473419331406,
+        "price_low": 11.3992671939219,
+        "price_mid": 12.082911235862788,
+        "price_high": 12.86533444322311,
+        "validation_accuracy": 0.5606060606060606,
+        "baseline_accuracy": 0.4393939393939394,
+        "brier_score": 0.2888730280797861,
+        "n_test": 66,
+        "confidence": "cao",
+        "horizon_sessions": 5
       },
       "model_quality": {
         "ticker": "DXG",
@@ -3159,7 +3744,7 @@
       "volume_spike": true,
       "relative_strength": -0.05157639276584358,
       "sector": "Bất động sản",
-      "sector_score": 66.8,
+      "sector_score": 68.6,
       "trade_plan": {
         "action": "CHỜ ĐIỂM MUA",
         "reason": "Chưa đồng thời thỏa vị trí giá và sức mạnh ngành.",
@@ -3181,6 +3766,21 @@
         "reward_risk_tp2": 2.0,
         "volume_ratio": 1.55,
         "is_chasing": false
+      },
+      "forecast_t5": {
+        "probability_up": 0.7927510183694284,
+        "expected_return_pct": 3.6915440235785932,
+        "downside_pct": -5.846273125531732,
+        "upside_pct": 16.750959520914773,
+        "price_low": 70.14452652147887,
+        "price_mid": 77.25020029756605,
+        "price_high": 86.9794648430815,
+        "validation_accuracy": 0.42424242424242425,
+        "baseline_accuracy": 0.5454545454545454,
+        "brier_score": 0.40266782462184825,
+        "n_test": 66,
+        "confidence": "thấp",
+        "horizon_sessions": 5
       },
       "model_quality": {
         "ticker": "VHM",
@@ -3209,7 +3809,7 @@
       "ret_20d_pct": 2.386190556777801,
       "above_ma20": 1.0,
       "above_ma50": 1.0,
-      "volume_ratio": 0.9418098842844832,
+      "volume_ratio": 0.9418484260289336,
       "avg_trade_value_bn": 134.71,
       "fast_score": 71.0,
       "change_pct": -3.416347381864626,
@@ -3221,7 +3821,7 @@
       "volume_spike": false,
       "relative_strength": -0.001570696348392353,
       "sector": "Bất động sản",
-      "sector_score": 66.8,
+      "sector_score": 68.6,
       "trade_plan": {
         "action": "CHỜ ĐIỂM MUA",
         "reason": "Chưa đồng thời thỏa vị trí giá và sức mạnh ngành.",
@@ -3243,6 +3843,21 @@
         "reward_risk_tp2": 2.0,
         "volume_ratio": 1.12,
         "is_chasing": false
+      },
+      "forecast_t5": {
+        "probability_up": 0.20758549033397192,
+        "expected_return_pct": -3.507927458918202,
+        "downside_pct": -6.570714381940604,
+        "upside_pct": 2.2469443587302758,
+        "price_low": 56.524717798925934,
+        "price_mid": 58.377703887354485,
+        "price_high": 61.85940133703181,
+        "validation_accuracy": 0.5757575757575758,
+        "baseline_accuracy": 0.42424242424242425,
+        "brier_score": 0.2405789447383678,
+        "n_test": 66,
+        "confidence": "cao",
+        "horizon_sessions": 5
       },
       "model_quality": {
         "ticker": "VPI",
@@ -3272,7 +3887,7 @@
       "ret_20d_pct": 0.4761904761904745,
       "above_ma20": 1.0,
       "above_ma50": 1.0,
-      "volume_ratio": 1.9462226123855415,
+      "volume_ratio": 1.9464429391226175,
       "avg_trade_value_bn": 2.52,
       "fast_score": 70.4,
       "change_pct": -3.2110091743119185,
@@ -3284,7 +3899,7 @@
       "volume_spike": false,
       "relative_strength": -0.020670697154265616,
       "sector": "Bất động sản",
-      "sector_score": 66.8,
+      "sector_score": 68.6,
       "trade_plan": {
         "action": "CHỜ ĐIỂM MUA",
         "reason": "Chưa đồng thời thỏa vị trí giá và sức mạnh ngành.",
@@ -3306,6 +3921,21 @@
         "reward_risk_tp2": 2.0,
         "volume_ratio": 1.25,
         "is_chasing": false
+      },
+      "forecast_t5": {
+        "probability_up": 0.45481024809793774,
+        "expected_return_pct": -0.09961251015485142,
+        "downside_pct": -2.954812326970031,
+        "upside_pct": 5.294744717926571,
+        "price_low": 10.238267299504662,
+        "price_mid": 10.539490880178663,
+        "price_high": 11.108595567741254,
+        "validation_accuracy": 0.6212121212121212,
+        "baseline_accuracy": 0.6212121212121212,
+        "brier_score": 0.25928326066273905,
+        "n_test": 66,
+        "confidence": "thấp",
+        "horizon_sessions": 5
       },
       "model_quality": {
         "ticker": "AGG",
@@ -3368,6 +3998,21 @@
         "reward_risk_tp2": 2.0,
         "volume_ratio": 0.71,
         "is_chasing": false
+      },
+      "forecast_t5": {
+        "probability_up": 0.47038708111544636,
+        "expected_return_pct": -0.25261226792165437,
+        "downside_pct": -3.21272677898128,
+        "upside_pct": 8.404312643067458,
+        "price_low": 20.180146466582404,
+        "price_mid": 20.797330342138334,
+        "price_high": 22.60229918607957,
+        "validation_accuracy": 0.4090909090909091,
+        "baseline_accuracy": 0.5151515151515151,
+        "brier_score": 0.34018512054626526,
+        "n_test": 66,
+        "confidence": "thấp",
+        "horizon_sessions": 5
       },
       "model_quality": {
         "ticker": "SSI",
@@ -3432,6 +4077,21 @@
         "volume_ratio": 0.92,
         "is_chasing": false
       },
+      "forecast_t5": {
+        "probability_up": 0.6004234217982648,
+        "expected_return_pct": 2.7972287278823136,
+        "downside_pct": -6.308000680394782,
+        "upside_pct": 10.104015034512576,
+        "price_low": 34.947115746212745,
+        "price_mid": 38.3433663155001,
+        "price_high": 41.06879760787319,
+        "validation_accuracy": 0.5151515151515151,
+        "baseline_accuracy": 0.45454545454545453,
+        "brier_score": 0.3198573568259125,
+        "n_test": 66,
+        "confidence": "cao",
+        "horizon_sessions": 5
+      },
       "model_quality": {
         "ticker": "PVS",
         "gate": "BLOCK",
@@ -3494,6 +4154,21 @@
         "volume_ratio": 1.24,
         "is_chasing": false
       },
+      "forecast_t5": {
+        "probability_up": 0.3512406958599001,
+        "expected_return_pct": -0.2641754893339534,
+        "downside_pct": -1.8643198658018403,
+        "upside_pct": 1.8581171798021787,
+        "price_low": 14.622216339995525,
+        "price_mid": 14.860637852089242,
+        "price_high": 15.176859459790524,
+        "validation_accuracy": 0.5454545454545454,
+        "baseline_accuracy": 0.5303030303030303,
+        "brier_score": 0.3182383000391059,
+        "n_test": 66,
+        "confidence": "thấp",
+        "horizon_sessions": 5
+      },
       "model_quality": {
         "ticker": "VIB",
         "gate": "CAUTION",
@@ -3509,6 +4184,394 @@
           "avg_return_pct": null
         },
         "reasons": [
+          "Brier Score chưa tốt hơn mốc 0,25",
+          "Paper T+5 mới có 0/8 mẫu"
+        ]
+      }
+    }
+  ],
+  "forecast_top5": [
+    {
+      "ticker": "VRE",
+      "price": 27.0,
+      "ret_5d_pct": 5.46875,
+      "ret_20d_pct": 2.07939508506616,
+      "above_ma20": 1.0,
+      "above_ma50": 1.0,
+      "volume_ratio": 1.3824923391215527,
+      "avg_trade_value_bn": 149.59,
+      "fast_score": 83.6,
+      "change_pct": 1.8867924528301883,
+      "probability_t1": 0.8200355975649422,
+      "quick_accuracy": 0.5151515151515151,
+      "quick_baseline_accuracy": 0.5606060606060606,
+      "brier_score": 0.2935750395591254,
+      "n_test": 66,
+      "volume_spike": true,
+      "relative_strength": -0.004638651065508759,
+      "sector": "Bất động sản",
+      "sector_score": 68.6,
+      "trade_plan": {
+        "action": "KHÔNG MUA ĐUỔI",
+        "reason": "Giá đã đi xa hơn vùng mua trên 0,5 ATR.",
+        "setup": "Chờ giá về vùng hỗ trợ",
+        "current_price": 27.0,
+        "entry_low": 25.26,
+        "entry_high": 25.74,
+        "entry_reference": 25.5,
+        "stop_loss": 23.41,
+        "stop_basis": "Hỗ trợ kỹ thuật − 0,3 ATR",
+        "tp1": 27.58,
+        "tp2": 29.67,
+        "trailing_stop": 25.5,
+        "atr": 0.8,
+        "atr_pct": 2.98,
+        "risk_per_share": 2.09,
+        "risk_pct": 8.19,
+        "reward_risk_tp1": 1.0,
+        "reward_risk_tp2": 2.0,
+        "volume_ratio": 2.06,
+        "is_chasing": true
+      },
+      "forecast_t5": {
+        "probability_up": 0.9499845068455426,
+        "expected_return_pct": 5.804969204344374,
+        "downside_pct": -4.846668762863722,
+        "upside_pct": 15.622053586242169,
+        "price_low": 25.691399434026795,
+        "price_mid": 28.56734168517298,
+        "price_high": 31.217954468285388,
+        "validation_accuracy": 0.4,
+        "baseline_accuracy": 0.5846153846153846,
+        "brier_score": 0.38208855642699835,
+        "n_test": 65,
+        "confidence": "thấp",
+        "horizon_sessions": 5
+      },
+      "model_quality": {
+        "ticker": "VRE",
+        "gate": "BLOCK",
+        "label": "🔴 Mất lợi thế / không đạt",
+        "model_edge_pp": -4.55,
+        "quick_accuracy_pct": 51.5,
+        "baseline_accuracy_pct": 56.1,
+        "brier_score": 0.294,
+        "holdout_samples": 66,
+        "paper_t5": {
+          "count": 0,
+          "win_rate_pct": null,
+          "avg_return_pct": null
+        },
+        "reasons": [
+          "Mô hình không vượt baseline",
+          "Xác suất hiệu chỉnh kém (Brier > 0,27)",
+          "Paper T+5 mới có 0/8 mẫu"
+        ]
+      }
+    },
+    {
+      "ticker": "NLG",
+      "price": 25.5,
+      "ret_5d_pct": 4.081632653061229,
+      "ret_20d_pct": 17.24137931034482,
+      "above_ma20": 1.0,
+      "above_ma50": 1.0,
+      "volume_ratio": 1.0700540680142618,
+      "avg_trade_value_bn": 49.65,
+      "fast_score": 84.2,
+      "change_pct": -0.7782101167315147,
+      "probability_t1": 0.8193979293554889,
+      "quick_accuracy": 0.582089552238806,
+      "quick_baseline_accuracy": 0.5373134328358209,
+      "brier_score": 0.25859617190640305,
+      "n_test": 67,
+      "volume_spike": false,
+      "relative_strength": 0.14698119118727782,
+      "sector": "Bất động sản",
+      "sector_score": 68.6,
+      "trade_plan": {
+        "action": "KHÔNG MUA ĐUỔI",
+        "reason": "Giá đã đi xa hơn vùng mua trên 0,5 ATR.",
+        "setup": "Chờ giá về vùng hỗ trợ",
+        "current_price": 25.5,
+        "entry_low": 23.76,
+        "entry_high": 24.21,
+        "entry_reference": 23.99,
+        "stop_loss": 21.33,
+        "stop_basis": "Hỗ trợ kỹ thuật − 0,3 ATR",
+        "tp1": 26.64,
+        "tp2": 29.3,
+        "trailing_stop": 24.22,
+        "atr": 0.74,
+        "atr_pct": 2.9,
+        "risk_per_share": 2.66,
+        "risk_pct": 11.08,
+        "reward_risk_tp1": 1.0,
+        "reward_risk_tp2": 2.0,
+        "volume_ratio": 1.08,
+        "is_chasing": true
+      },
+      "forecast_t5": {
+        "probability_up": 0.9213438863800423,
+        "expected_return_pct": 3.0911725788622015,
+        "downside_pct": -1.6660737673611266,
+        "upside_pct": 5.495814036490057,
+        "price_low": 25.075151189322913,
+        "price_mid": 26.28824900760986,
+        "price_high": 26.901432579304966,
+        "validation_accuracy": 0.7575757575757576,
+        "baseline_accuracy": 0.5909090909090909,
+        "brier_score": 0.21450457628830066,
+        "n_test": 66,
+        "confidence": "cao",
+        "horizon_sessions": 5
+      },
+      "model_quality": {
+        "ticker": "NLG",
+        "gate": "CAUTION",
+        "label": "🟡 Chờ kiểm định thêm",
+        "model_edge_pp": 4.48,
+        "quick_accuracy_pct": 58.2,
+        "baseline_accuracy_pct": 53.7,
+        "brier_score": 0.259,
+        "holdout_samples": 67,
+        "paper_t5": {
+          "count": 0,
+          "win_rate_pct": null,
+          "avg_return_pct": null
+        },
+        "reasons": [
+          "Brier Score chưa tốt hơn mốc 0,25",
+          "Paper T+5 mới có 0/8 mẫu"
+        ]
+      }
+    },
+    {
+      "ticker": "DXG",
+      "price": 11.5,
+      "ret_5d_pct": -4.564315352697101,
+      "ret_20d_pct": 6.481481481481466,
+      "above_ma20": 1.0,
+      "above_ma50": 1.0,
+      "volume_ratio": 1.0505598012370072,
+      "avg_trade_value_bn": 128.75,
+      "fast_score": 72.7,
+      "change_pct": -2.5423728813559365,
+      "probability_t1": 0.4024842523708643,
+      "quick_accuracy": 0.5970149253731343,
+      "quick_baseline_accuracy": 0.5074626865671642,
+      "brier_score": 0.24720211484776142,
+      "n_test": 67,
+      "volume_spike": false,
+      "relative_strength": 0.0393822128986443,
+      "sector": "Bất động sản",
+      "sector_score": 68.6,
+      "trade_plan": {
+        "action": "MUA THĂM DÒ",
+        "reason": "Giá trong vùng mua và ngành không yếu.",
+        "setup": "Pullback quanh EMA20",
+        "current_price": 11.5,
+        "entry_low": 11.39,
+        "entry_high": 11.64,
+        "entry_reference": 11.52,
+        "stop_loss": 10.57,
+        "stop_basis": "Hỗ trợ kỹ thuật − 0,3 ATR",
+        "tp1": 12.46,
+        "tp2": 13.41,
+        "trailing_stop": 11.52,
+        "atr": 0.42,
+        "atr_pct": 3.63,
+        "risk_per_share": 0.94,
+        "risk_pct": 8.2,
+        "reward_risk_tp1": 1.0,
+        "reward_risk_tp2": 2.0,
+        "volume_ratio": 0.85,
+        "is_chasing": false
+      },
+      "forecast_t5": {
+        "probability_up": 0.9138797801269077,
+        "expected_return_pct": 5.0687933553286015,
+        "downside_pct": -0.8759374441573832,
+        "upside_pct": 11.872473419331406,
+        "price_low": 11.3992671939219,
+        "price_mid": 12.082911235862788,
+        "price_high": 12.86533444322311,
+        "validation_accuracy": 0.5606060606060606,
+        "baseline_accuracy": 0.4393939393939394,
+        "brier_score": 0.2888730280797861,
+        "n_test": 66,
+        "confidence": "cao",
+        "horizon_sessions": 5
+      },
+      "model_quality": {
+        "ticker": "DXG",
+        "gate": "CAUTION",
+        "label": "🟡 Chờ kiểm định thêm",
+        "model_edge_pp": 8.96,
+        "quick_accuracy_pct": 59.7,
+        "baseline_accuracy_pct": 50.7,
+        "brier_score": 0.247,
+        "holdout_samples": 67,
+        "paper_t5": {
+          "count": 0,
+          "win_rate_pct": null,
+          "avg_return_pct": null
+        },
+        "reasons": [
+          "Paper T+5 mới có 0/8 mẫu"
+        ]
+      }
+    },
+    {
+      "ticker": "DGW",
+      "price": 41.8,
+      "ret_5d_pct": -1.0650887573964596,
+      "ret_20d_pct": 6.76883780332056,
+      "above_ma20": 1.0,
+      "above_ma50": 1.0,
+      "volume_ratio": 1.2820977330410885,
+      "avg_trade_value_bn": 67.57,
+      "fast_score": 81.2,
+      "change_pct": 4.369538077403257,
+      "probability_t1": 0.6538201753164985,
+      "quick_accuracy": 0.5074626865671642,
+      "quick_baseline_accuracy": 0.417910447761194,
+      "brier_score": 0.27614130846322277,
+      "n_test": 67,
+      "volume_spike": true,
+      "relative_strength": 0.04225577611703524,
+      "sector": "Phân phối công nghệ",
+      "sector_score": 95.6,
+      "trade_plan": {
+        "action": "CHỜ ĐIỂM MUA",
+        "reason": "Chưa đồng thời thỏa vị trí giá và sức mạnh ngành.",
+        "setup": "Pullback quanh EMA20",
+        "current_price": 41.8,
+        "entry_low": 40.72,
+        "entry_high": 41.59,
+        "entry_reference": 41.15,
+        "stop_loss": 38.46,
+        "stop_basis": "Hỗ trợ kỹ thuật − 0,3 ATR",
+        "tp1": 43.84,
+        "tp2": 46.53,
+        "trailing_stop": 41.15,
+        "atr": 1.45,
+        "atr_pct": 3.48,
+        "risk_per_share": 2.69,
+        "risk_pct": 6.53,
+        "reward_risk_tp1": 1.0,
+        "reward_risk_tp2": 2.0,
+        "volume_ratio": 1.65,
+        "is_chasing": false
+      },
+      "forecast_t5": {
+        "probability_up": 0.8236009428284659,
+        "expected_return_pct": 4.91682207418231,
+        "downside_pct": -5.462932698659258,
+        "upside_pct": 12.778887514412055,
+        "price_low": 39.51649413196043,
+        "price_mid": 43.8552316270082,
+        "price_high": 47.141574981024235,
+        "validation_accuracy": 0.48484848484848486,
+        "baseline_accuracy": 0.5151515151515151,
+        "brier_score": 0.2768115239119687,
+        "n_test": 66,
+        "confidence": "thấp",
+        "horizon_sessions": 5
+      },
+      "model_quality": {
+        "ticker": "DGW",
+        "gate": "BLOCK",
+        "label": "🔴 Mất lợi thế / không đạt",
+        "model_edge_pp": 8.96,
+        "quick_accuracy_pct": 50.7,
+        "baseline_accuracy_pct": 41.8,
+        "brier_score": 0.276,
+        "holdout_samples": 67,
+        "paper_t5": {
+          "count": 0,
+          "win_rate_pct": null,
+          "avg_return_pct": null
+        },
+        "reasons": [
+          "Xác suất hiệu chỉnh kém (Brier > 0,27)",
+          "Paper T+5 mới có 0/8 mẫu"
+        ]
+      }
+    },
+    {
+      "ticker": "MSN",
+      "price": 68.6,
+      "ret_5d_pct": -2.1398002853067033,
+      "ret_20d_pct": 2.083333333333326,
+      "above_ma20": 1.0,
+      "above_ma50": 1.0,
+      "volume_ratio": 0.9753981918363085,
+      "avg_trade_value_bn": 281.59,
+      "fast_score": 74.6,
+      "change_pct": -0.5797101449275477,
+      "probability_t1": 0.6486192557429215,
+      "quick_accuracy": 0.5373134328358209,
+      "quick_baseline_accuracy": 0.5223880597014925,
+      "brier_score": 0.25078714415230413,
+      "n_test": 67,
+      "volume_spike": false,
+      "relative_strength": -0.004599268582837102,
+      "sector": "Tiêu dùng",
+      "sector_score": 46.1,
+      "trade_plan": {
+        "action": "CHỜ ĐIỂM MUA",
+        "reason": "Chưa đồng thời thỏa vị trí giá và sức mạnh ngành.",
+        "setup": "Pullback quanh EMA20",
+        "current_price": 68.6,
+        "entry_low": 68.11,
+        "entry_high": 68.98,
+        "entry_reference": 68.55,
+        "stop_loss": 65.07,
+        "stop_basis": "Hỗ trợ kỹ thuật − 0,3 ATR",
+        "tp1": 72.02,
+        "tp2": 75.5,
+        "trailing_stop": 68.55,
+        "atr": 1.44,
+        "atr_pct": 2.1,
+        "risk_per_share": 3.48,
+        "risk_pct": 5.07,
+        "reward_risk_tp1": 1.0,
+        "reward_risk_tp2": 2.0,
+        "volume_ratio": 0.89,
+        "is_chasing": false
+      },
+      "forecast_t5": {
+        "probability_up": 0.8124830457392582,
+        "expected_return_pct": 2.7851070581829624,
+        "downside_pct": -3.1258384259548015,
+        "upside_pct": 4.623276375440715,
+        "price_low": 66.45567483979501,
+        "price_mid": 70.5105834419135,
+        "price_high": 71.77156759355232,
+        "validation_accuracy": 0.4393939393939394,
+        "baseline_accuracy": 0.5303030303030303,
+        "brier_score": 0.2888997793464995,
+        "n_test": 66,
+        "confidence": "thấp",
+        "horizon_sessions": 5
+      },
+      "model_quality": {
+        "ticker": "MSN",
+        "gate": "CAUTION",
+        "label": "🟡 Chờ kiểm định thêm",
+        "model_edge_pp": 1.49,
+        "quick_accuracy_pct": 53.7,
+        "baseline_accuracy_pct": 52.2,
+        "brier_score": 0.251,
+        "holdout_samples": 67,
+        "paper_t5": {
+          "count": 0,
+          "win_rate_pct": null,
+          "avg_return_pct": null
+        },
+        "reasons": [
+          "Lợi thế so với baseline dưới 2 điểm %",
           "Brier Score chưa tốt hơn mốc 0,25",
           "Paper T+5 mới có 0/8 mẫu"
         ]
@@ -3597,6 +4660,22 @@
       "score_change": 0.0
     },
     {
+      "sector": "Bất động sản",
+      "score": 68.6,
+      "status": "Đang cải thiện",
+      "stock_count": 11,
+      "return_5d_pct": -0.04,
+      "return_20d_pct": 4.24,
+      "relative_strength_20d_pct": 1.7,
+      "breadth_ma20_pct": 81.8,
+      "breadth_ma50_pct": 72.7,
+      "volume_ratio": 1.11,
+      "leader_ratio_pct": 45.5,
+      "news_score": 47.6,
+      "news_count": 5,
+      "score_change": 1.8
+    },
+    {
       "sector": "Chưa phân loại",
       "score": 67.2,
       "status": "Đang cải thiện",
@@ -3611,22 +4690,6 @@
       "news_score": null,
       "news_count": 0,
       "score_change": 0.0
-    },
-    {
-      "sector": "Bất động sản",
-      "score": 66.8,
-      "status": "Đang cải thiện",
-      "stock_count": 11,
-      "return_5d_pct": -0.04,
-      "return_20d_pct": 4.24,
-      "relative_strength_20d_pct": 1.7,
-      "breadth_ma20_pct": 81.8,
-      "breadth_ma50_pct": 72.7,
-      "volume_ratio": 1.11,
-      "leader_ratio_pct": 45.5,
-      "news_score": 29.4,
-      "news_count": 4,
-      "score_change": -0.3
     },
     {
       "sector": "Phân bón",
@@ -3693,6 +4756,22 @@
       "score_change": 0.0
     },
     {
+      "sector": "Công nghệ",
+      "score": 46.4,
+      "status": "Trung tính / tích lũy",
+      "stock_count": 2,
+      "return_5d_pct": -1.38,
+      "return_20d_pct": -2.06,
+      "relative_strength_20d_pct": -4.61,
+      "breadth_ma20_pct": 50.0,
+      "breadth_ma50_pct": 50.0,
+      "volume_ratio": 1.28,
+      "leader_ratio_pct": 50.0,
+      "news_score": 62.5,
+      "news_count": 2,
+      "score_change": 0.9
+    },
+    {
       "sector": "Tiêu dùng",
       "score": 46.1,
       "status": "Trung tính / tích lũy",
@@ -3707,22 +4786,6 @@
       "news_score": null,
       "news_count": 0,
       "score_change": 0.0
-    },
-    {
-      "sector": "Công nghệ",
-      "score": 45.5,
-      "status": "Trung tính / tích lũy",
-      "stock_count": 2,
-      "return_5d_pct": -1.38,
-      "return_20d_pct": -2.06,
-      "relative_strength_20d_pct": -4.61,
-      "breadth_ma20_pct": 50.0,
-      "breadth_ma50_pct": 50.0,
-      "volume_ratio": 1.28,
-      "leader_ratio_pct": 50.0,
-      "news_score": 53.1,
-      "news_count": 3,
-      "score_change": 0.1
     },
     {
       "sector": "Ngân hàng",
@@ -3918,7 +4981,7 @@
     },
     {
       "sector": "Thép",
-      "score": 16.5,
+      "score": 16.6,
       "status": "Điều chỉnh mạnh",
       "stock_count": 3,
       "return_5d_pct": -2.73,
@@ -3928,9 +4991,9 @@
       "breadth_ma50_pct": 0.0,
       "volume_ratio": 0.98,
       "leader_ratio_pct": 0.0,
-      "news_score": 27.9,
+      "news_score": 28.3,
       "news_count": 2,
-      "score_change": 0.0
+      "score_change": 0.1
     },
     {
       "sector": "Cảng & logistics",
