@@ -121,6 +121,8 @@ def main():
                 continue
             feats = build_features(raw)
             prediction = quick_train_predict(feats, "target_1")
+            forecast_t5 = quick_train_predict(feats, "target_5")
+            range_models_t5 = train_quantile_models(feats, "fut_ret_5")
             if prediction is None:
                 continue
             signals = add_signal_columns(feats)
@@ -143,6 +145,30 @@ def main():
             }
             item["trade_plan"] = build_trade_plan(
                 raw, sector_score=item["sector_score"], market_trend=market_trend)
+            if forecast_t5 and range_models_t5:
+                latest_features = feats.dropna(subset=[
+                    "ma_cross", "rsi14", "macd_hist", "vol_ratio", "atr14", "boll_pctb",
+                    "ret_1", "ret_3", "adx14", "obv_z", "stoch_k", "stoch_d",
+                ]).iloc[[-1]]
+                price_range = predict_price_range(
+                    range_models_t5, latest_features, float(item["price"]))
+                edge = forecast_t5["quick_accuracy"] - forecast_t5["quick_baseline_accuracy"]
+                confidence = "cao" if edge >= 0.06 else "trung bình" if edge >= 0.02 else "thấp"
+                item["forecast_t5"] = {
+                    "probability_up": forecast_t5["probability"],
+                    "expected_return_pct": price_range["mid_pct"],
+                    "downside_pct": price_range["lo_pct"],
+                    "upside_pct": price_range["hi_pct"],
+                    "price_low": price_range["lo_price"],
+                    "price_mid": price_range["mid_price"],
+                    "price_high": price_range["hi_price"],
+                    "validation_accuracy": forecast_t5["quick_accuracy"],
+                    "baseline_accuracy": forecast_t5["quick_baseline_accuracy"],
+                    "brier_score": forecast_t5["brier_score"],
+                    "n_test": forecast_t5["n_test"],
+                    "confidence": confidence,
+                    "horizon_sessions": 5,
+                }
             results.append(item)
             print(f"  {ticker}: nhanh {item['fast_score']:.1f}, xác suất T+1 {prediction['probability']*100:.0f}%")
         except Exception as exc:
@@ -152,6 +178,14 @@ def main():
     journal = process_journal(existing_journal, results, histories, scanned_at)
     results = attach_quality_reports(results, journal.get("trades", []))
     opportunities = categorize_opportunities(results)
+    forecast_top5 = sorted(
+        (item for item in results if item.get("forecast_t5")),
+        key=lambda item: (
+            item["forecast_t5"]["probability_up"],
+            item["forecast_t5"]["expected_return_pct"],
+        ),
+        reverse=True,
+    )[:5]
     output = {
         "schema_version": 9, "scanned_at": scanned_at, "watchlist": universe,
         "universe_stats": {"requested": len(universe), "downloaded": len(histories),
