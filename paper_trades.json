@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-09-08T00:36:00.354342",
+  "updated_at": "2026-09-08T05:48:23.025455",
   "transaction_cost_pct": 0.3,
   "trades": [
     {
@@ -26,8 +26,8 @@
       "exit_price": null,
       "exit_reason": null,
       "net_return_pct": null,
-      "mfe_pct": null,
-      "mae_pct": null,
+      "mfe_pct": 0.69,
+      "mae_pct": -1.48,
       "horizon_returns_pct": {}
     },
     {
@@ -53,8 +53,8 @@
       "exit_price": null,
       "exit_reason": null,
       "net_return_pct": null,
-      "mfe_pct": null,
-      "mae_pct": null,
+      "mfe_pct": 2.89,
+      "mae_pct": 0.18,
       "horizon_returns_pct": {}
     }
   ],
