@@ -5,7 +5,7 @@ import pandas as pd
 
 from features import FEATURE_COLS
 
-TARGET_HORIZONS = {"target_1": 1, "target_3": 3}
+TARGET_HORIZONS = {"target_1": 1, "target_3": 3, "target_5": 5}
 
 
 def target_horizon(target_col: str) -> int:
