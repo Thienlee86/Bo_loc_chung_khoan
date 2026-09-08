@@ -68,9 +68,9 @@ def build_features(df: pd.DataFrame) -> pd.DataFrame:
     d["stoch_d"] = stoch_k.rolling(3).mean() / 100
 
     d["target_1"] = _future_direction(d["close"], 1)
-    d["target_3"] = _future_direction(d["close"], 3)
+    d["target_3"] = _future_direction(d["close"], 3)\n    d["target_5"] = _future_direction(d["close"], 5)
     d["fut_ret_1"] = d["close"].shift(-1) / d["close"] - 1
-    d["fut_ret_3"] = d["close"].shift(-3) / d["close"] - 1
+    d["fut_ret_3"] = d["close"].shift(-3) / d["close"] - 1\n    d["fut_ret_5"] = d["close"].shift(-5) / d["close"] - 1
     return d
 
 
