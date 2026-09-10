@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-09-10T05:47:57.959598",
+  "updated_at": "2026-09-10T13:06:51.319947",
   "transaction_cost_pct": 0.3,
   "trades": [
     {
@@ -27,7 +27,7 @@
       "exit_reason": null,
       "net_return_pct": null,
       "mfe_pct": 0.74,
-      "mae_pct": -1.12,
+      "mae_pct": -1.91,
       "horizon_returns_pct": {}
     },
     {
