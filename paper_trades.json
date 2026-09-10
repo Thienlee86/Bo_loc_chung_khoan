@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-09-09T13:09:15.949089",
+  "updated_at": "2026-09-10T05:47:57.959598",
   "transaction_cost_pct": 0.3,
   "trades": [
     {
@@ -26,8 +26,8 @@
       "exit_price": null,
       "exit_reason": null,
       "net_return_pct": null,
-      "mfe_pct": null,
-      "mae_pct": null,
+      "mfe_pct": 0.74,
+      "mae_pct": -1.12,
       "horizon_returns_pct": {}
     },
     {
@@ -82,7 +82,9 @@
       "net_return_pct": null,
       "mfe_pct": 0.69,
       "mae_pct": -3.65,
-      "horizon_returns_pct": {}
+      "horizon_returns_pct": {
+        "t3": -3.08
+      }
     },
     {
       "id": "2026-09-07:DPM",
@@ -109,7 +111,9 @@
       "net_return_pct": null,
       "mfe_pct": 4.69,
       "mae_pct": 0.18,
-      "horizon_returns_pct": {}
+      "horizon_returns_pct": {
+        "t3": 2.59
+      }
     }
   ],
   "summary": {
@@ -123,9 +127,9 @@
     "stop_rate_pct": 0.0,
     "horizons": {
       "t3": {
-        "count": 0,
-        "win_rate_pct": null,
-        "avg_return_pct": null
+        "count": 2,
+        "win_rate_pct": 50.0,
+        "avg_return_pct": -0.25
       },
       "t5": {
         "count": 0,
