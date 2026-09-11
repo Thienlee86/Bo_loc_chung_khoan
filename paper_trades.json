@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-09-10T13:06:51.319947",
+  "updated_at": "2026-09-11T05:47:40.868400",
   "transaction_cost_pct": 0.3,
   "trades": [
     {
@@ -26,7 +26,7 @@
       "exit_price": null,
       "exit_reason": null,
       "net_return_pct": null,
-      "mfe_pct": 0.74,
+      "mfe_pct": 2.87,
       "mae_pct": -1.91,
       "horizon_returns_pct": {}
     },
@@ -54,8 +54,10 @@
       "exit_reason": null,
       "net_return_pct": null,
       "mfe_pct": -0.61,
-      "mae_pct": -3.65,
-      "horizon_returns_pct": {}
+      "mae_pct": -6.25,
+      "horizon_returns_pct": {
+        "t3": -6.12
+      }
     },
     {
       "id": "2026-09-07:DXG",
@@ -81,7 +83,7 @@
       "exit_reason": null,
       "net_return_pct": null,
       "mfe_pct": 0.69,
-      "mae_pct": -3.65,
+      "mae_pct": -6.25,
       "horizon_returns_pct": {
         "t3": -3.08
       }
@@ -127,9 +129,9 @@
     "stop_rate_pct": 0.0,
     "horizons": {
       "t3": {
-        "count": 2,
-        "win_rate_pct": 50.0,
-        "avg_return_pct": -0.25
+        "count": 3,
+        "win_rate_pct": 33.3,
+        "avg_return_pct": -2.2
       },
       "t5": {
         "count": 0,
