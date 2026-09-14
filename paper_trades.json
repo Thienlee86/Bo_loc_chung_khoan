@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-09-14T05:59:58.265652",
+  "updated_at": "2026-09-14T15:13:39.856347",
   "transaction_cost_pct": 0.3,
   "trades": [
     {
@@ -58,6 +58,33 @@
       "horizon_returns_pct": {}
     },
     {
+      "id": "2026-09-14:DGC",
+      "ticker": "DGC",
+      "sector": "Hóa chất",
+      "signal_date": "2026-09-14",
+      "created_at": "2026-09-14T15:13:39.856347",
+      "action": "MUA THĂM DÒ",
+      "setup": "Pullback quanh EMA20",
+      "entry_price": 37.07,
+      "stop_loss": 33.37,
+      "tp1": 40.76,
+      "tp2": 44.45,
+      "sector_score": 81.2,
+      "probability_t1": 0.5623607053022931,
+      "quick_accuracy": 0.5373134328358209,
+      "status": "open",
+      "tp1_hit": false,
+      "tp2_hit": false,
+      "stop_hit": false,
+      "exit_date": null,
+      "exit_price": null,
+      "exit_reason": null,
+      "net_return_pct": null,
+      "mfe_pct": null,
+      "mae_pct": null,
+      "horizon_returns_pct": {}
+    },
+    {
       "id": "2026-09-11:VRE",
       "ticker": "VRE",
       "sector": "Bất động sản",
@@ -81,7 +108,7 @@
       "exit_reason": null,
       "net_return_pct": null,
       "mfe_pct": 0.19,
-      "mae_pct": -2.53,
+      "mae_pct": -3.7,
       "horizon_returns_pct": {}
     },
     {
@@ -162,7 +189,7 @@
       "exit_reason": null,
       "net_return_pct": null,
       "mfe_pct": -0.59,
-      "mae_pct": -2.72,
+      "mae_pct": -4.84,
       "horizon_returns_pct": {}
     },
     {
@@ -189,7 +216,7 @@
       "exit_reason": null,
       "net_return_pct": null,
       "mfe_pct": 0.39,
-      "mae_pct": -0.48,
+      "mae_pct": -1.14,
       "horizon_returns_pct": {}
     },
     {
@@ -243,7 +270,7 @@
       "exit_reason": null,
       "net_return_pct": null,
       "mfe_pct": 1.25,
-      "mae_pct": -0.99,
+      "mae_pct": -2.33,
       "horizon_returns_pct": {}
     },
     {
@@ -297,7 +324,7 @@
       "exit_reason": null,
       "net_return_pct": null,
       "mfe_pct": 2.87,
-      "mae_pct": -1.91,
+      "mae_pct": -2.18,
       "horizon_returns_pct": {
         "t3": 0.18
       }
@@ -317,16 +344,16 @@
       "sector_score": 60.2,
       "probability_t1": 0.4265244278802523,
       "quick_accuracy": 0.5671641791044776,
-      "status": "open",
+      "status": "closed",
       "tp1_hit": false,
       "tp2_hit": false,
-      "stop_hit": false,
-      "exit_date": null,
-      "exit_price": null,
-      "exit_reason": null,
-      "net_return_pct": null,
+      "stop_hit": true,
+      "exit_date": "2026-09-14",
+      "exit_price": 10.58,
+      "exit_reason": "stop_loss",
+      "net_return_pct": -8.46,
       "mfe_pct": -0.61,
-      "mae_pct": -7.99,
+      "mae_pct": -8.85,
       "horizon_returns_pct": {
         "t3": -6.12
       }
@@ -346,16 +373,16 @@
       "sector_score": 67.1,
       "probability_t1": 0.4024842523708643,
       "quick_accuracy": 0.5970149253731343,
-      "status": "open",
+      "status": "closed",
       "tp1_hit": false,
       "tp2_hit": false,
-      "stop_hit": false,
-      "exit_date": null,
-      "exit_price": null,
-      "exit_reason": null,
-      "net_return_pct": null,
+      "stop_hit": true,
+      "exit_date": "2026-09-14",
+      "exit_price": 10.57,
+      "exit_reason": "stop_loss",
+      "net_return_pct": -8.55,
       "mfe_pct": 0.69,
-      "mae_pct": -7.99,
+      "mae_pct": -8.85,
       "horizon_returns_pct": {
         "t3": -3.08,
         "t5": -6.12
@@ -385,7 +412,7 @@
       "exit_reason": null,
       "net_return_pct": null,
       "mfe_pct": 4.69,
-      "mae_pct": -0.27,
+      "mae_pct": -1.62,
       "horizon_returns_pct": {
         "t3": 2.59,
         "t5": 0.78
@@ -393,14 +420,14 @@
     }
   ],
   "summary": {
-    "total_signals": 14,
-    "open_signals": 14,
-    "closed_signals": 0,
-    "win_rate_pct": null,
-    "avg_net_return_pct": null,
-    "profit_factor": null,
-    "tp1_hit_rate_pct": 14.3,
-    "stop_rate_pct": 0.0,
+    "total_signals": 15,
+    "open_signals": 13,
+    "closed_signals": 2,
+    "win_rate_pct": 0.0,
+    "avg_net_return_pct": -8.51,
+    "profit_factor": 0.0,
+    "tp1_hit_rate_pct": 13.3,
+    "stop_rate_pct": 13.3,
     "horizons": {
       "t3": {
         "count": 4,
