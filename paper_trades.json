@@ -1,8 +1,62 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-09-11T13:01:28.202303",
+  "updated_at": "2026-09-14T05:59:58.265652",
   "transaction_cost_pct": 0.3,
   "trades": [
+    {
+      "id": "2026-09-14:PVD",
+      "ticker": "PVD",
+      "sector": "Dầu khí",
+      "signal_date": "2026-09-14",
+      "created_at": "2026-09-14T05:59:58.265652",
+      "action": "MUA THĂM DÒ",
+      "setup": "Pullback quanh EMA20",
+      "entry_price": 18.75,
+      "stop_loss": 17.47,
+      "tp1": 20.04,
+      "tp2": 21.32,
+      "sector_score": 68.4,
+      "probability_t1": 0.34082021967673903,
+      "quick_accuracy": 0.4626865671641791,
+      "status": "open",
+      "tp1_hit": false,
+      "tp2_hit": false,
+      "stop_hit": false,
+      "exit_date": null,
+      "exit_price": null,
+      "exit_reason": null,
+      "net_return_pct": null,
+      "mfe_pct": null,
+      "mae_pct": null,
+      "horizon_returns_pct": {}
+    },
+    {
+      "id": "2026-09-14:DPM",
+      "ticker": "DPM",
+      "sector": "Phân bón",
+      "signal_date": "2026-09-14",
+      "created_at": "2026-09-14T05:59:58.265652",
+      "action": "MUA THĂM DÒ",
+      "setup": "Pullback quanh EMA20",
+      "entry_price": 22.33,
+      "stop_loss": 21.23,
+      "tp1": 23.43,
+      "tp2": 24.53,
+      "sector_score": 72.7,
+      "probability_t1": 0.39490524592340936,
+      "quick_accuracy": 0.5522388059701493,
+      "status": "open",
+      "tp1_hit": false,
+      "tp2_hit": false,
+      "stop_hit": false,
+      "exit_date": null,
+      "exit_price": null,
+      "exit_reason": null,
+      "net_return_pct": null,
+      "mfe_pct": null,
+      "mae_pct": null,
+      "horizon_returns_pct": {}
+    },
     {
       "id": "2026-09-11:VRE",
       "ticker": "VRE",
@@ -26,8 +80,8 @@
       "exit_price": null,
       "exit_reason": null,
       "net_return_pct": null,
-      "mfe_pct": null,
-      "mae_pct": null,
+      "mfe_pct": 0.19,
+      "mae_pct": -2.53,
       "horizon_returns_pct": {}
     },
     {
@@ -53,8 +107,8 @@
       "exit_price": null,
       "exit_reason": null,
       "net_return_pct": null,
-      "mfe_pct": null,
-      "mae_pct": null,
+      "mfe_pct": 1.9,
+      "mae_pct": -0.79,
       "horizon_returns_pct": {}
     },
     {
@@ -80,8 +134,8 @@
       "exit_price": null,
       "exit_reason": null,
       "net_return_pct": null,
-      "mfe_pct": null,
-      "mae_pct": null,
+      "mfe_pct": 1.76,
+      "mae_pct": -2.23,
       "horizon_returns_pct": {}
     },
     {
@@ -107,8 +161,8 @@
       "exit_price": null,
       "exit_reason": null,
       "net_return_pct": null,
-      "mfe_pct": null,
-      "mae_pct": null,
+      "mfe_pct": -0.59,
+      "mae_pct": -2.72,
       "horizon_returns_pct": {}
     },
     {
@@ -134,8 +188,8 @@
       "exit_price": null,
       "exit_reason": null,
       "net_return_pct": null,
-      "mfe_pct": null,
-      "mae_pct": null,
+      "mfe_pct": 0.39,
+      "mae_pct": -0.48,
       "horizon_returns_pct": {}
     },
     {
@@ -161,8 +215,8 @@
       "exit_price": null,
       "exit_reason": null,
       "net_return_pct": null,
-      "mfe_pct": null,
-      "mae_pct": null,
+      "mfe_pct": 5.71,
+      "mae_pct": 2.3,
       "horizon_returns_pct": {}
     },
     {
@@ -188,8 +242,8 @@
       "exit_price": null,
       "exit_reason": null,
       "net_return_pct": null,
-      "mfe_pct": null,
-      "mae_pct": null,
+      "mfe_pct": 1.25,
+      "mae_pct": -0.99,
       "horizon_returns_pct": {}
     },
     {
@@ -208,15 +262,15 @@
       "probability_t1": 0.5465632241237385,
       "quick_accuracy": 0.5074626865671642,
       "status": "open",
-      "tp1_hit": false,
+      "tp1_hit": true,
       "tp2_hit": false,
       "stop_hit": false,
       "exit_date": null,
       "exit_price": null,
       "exit_reason": null,
       "net_return_pct": null,
-      "mfe_pct": null,
-      "mae_pct": null,
+      "mfe_pct": 5.05,
+      "mae_pct": 0.28,
       "horizon_returns_pct": {}
     },
     {
@@ -244,7 +298,9 @@
       "net_return_pct": null,
       "mfe_pct": 2.87,
       "mae_pct": -1.91,
-      "horizon_returns_pct": {}
+      "horizon_returns_pct": {
+        "t3": 0.18
+      }
     },
     {
       "id": "2026-09-08:DXG",
@@ -270,7 +326,7 @@
       "exit_reason": null,
       "net_return_pct": null,
       "mfe_pct": -0.61,
-      "mae_pct": -7.12,
+      "mae_pct": -7.99,
       "horizon_returns_pct": {
         "t3": -6.12
       }
@@ -299,9 +355,10 @@
       "exit_reason": null,
       "net_return_pct": null,
       "mfe_pct": 0.69,
-      "mae_pct": -7.12,
+      "mae_pct": -7.99,
       "horizon_returns_pct": {
-        "t3": -3.08
+        "t3": -3.08,
+        "t5": -6.12
       }
     },
     {
@@ -328,31 +385,32 @@
       "exit_reason": null,
       "net_return_pct": null,
       "mfe_pct": 4.69,
-      "mae_pct": 0.18,
+      "mae_pct": -0.27,
       "horizon_returns_pct": {
-        "t3": 2.59
+        "t3": 2.59,
+        "t5": 0.78
       }
     }
   ],
   "summary": {
-    "total_signals": 12,
-    "open_signals": 12,
+    "total_signals": 14,
+    "open_signals": 14,
     "closed_signals": 0,
     "win_rate_pct": null,
     "avg_net_return_pct": null,
     "profit_factor": null,
-    "tp1_hit_rate_pct": 8.3,
+    "tp1_hit_rate_pct": 14.3,
     "stop_rate_pct": 0.0,
     "horizons": {
       "t3": {
-        "count": 3,
-        "win_rate_pct": 33.3,
-        "avg_return_pct": -2.2
+        "count": 4,
+        "win_rate_pct": 50.0,
+        "avg_return_pct": -1.61
       },
       "t5": {
-        "count": 0,
-        "win_rate_pct": null,
-        "avg_return_pct": null
+        "count": 2,
+        "win_rate_pct": 50.0,
+        "avg_return_pct": -2.67
       },
       "t10": {
         "count": 0,
@@ -366,5 +424,18 @@
       }
     }
   },
-  "sector_summary_t5": []
+  "sector_summary_t5": [
+    {
+      "sector": "Phân bón",
+      "count": 1,
+      "avg_return_pct": 0.78,
+      "win_rate_pct": 100.0
+    },
+    {
+      "sector": "Bất động sản",
+      "count": 1,
+      "avg_return_pct": -6.12,
+      "win_rate_pct": 0.0
+    }
+  ]
 }
