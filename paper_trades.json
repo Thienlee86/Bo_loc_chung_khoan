@@ -1,8 +1,35 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-09-15T06:01:52.952656",
+  "updated_at": "2026-09-15T13:48:49.251976",
   "transaction_cost_pct": 0.3,
   "trades": [
+    {
+      "id": "2026-09-15:PVS",
+      "ticker": "PVS",
+      "sector": "Dầu khí",
+      "signal_date": "2026-09-15",
+      "created_at": "2026-09-15T13:48:49.251976",
+      "action": "MUA THĂM DÒ",
+      "setup": "Breakout có khối lượng",
+      "entry_price": 34.0,
+      "stop_loss": 31.24,
+      "tp1": 36.76,
+      "tp2": 39.53,
+      "sector_score": 90.8,
+      "probability_t1": 0.26435128229947014,
+      "quick_accuracy": 0.5522388059701493,
+      "status": "open",
+      "tp1_hit": false,
+      "tp2_hit": false,
+      "stop_hit": false,
+      "exit_date": null,
+      "exit_price": null,
+      "exit_reason": null,
+      "net_return_pct": null,
+      "mfe_pct": null,
+      "mae_pct": null,
+      "horizon_returns_pct": {}
+    },
     {
       "id": "2026-09-15:DPM",
       "ticker": "DPM",
@@ -53,7 +80,7 @@
       "exit_price": null,
       "exit_reason": null,
       "net_return_pct": null,
-      "mfe_pct": 2.4,
+      "mfe_pct": 6.4,
       "mae_pct": 0.27,
       "horizon_returns_pct": {}
     },
@@ -80,7 +107,7 @@
       "exit_price": null,
       "exit_reason": null,
       "net_return_pct": null,
-      "mfe_pct": -0.13,
+      "mfe_pct": 3.9,
       "mae_pct": -1.03,
       "horizon_returns_pct": {}
     },
@@ -108,7 +135,7 @@
       "exit_reason": null,
       "net_return_pct": null,
       "mfe_pct": 0.35,
-      "mae_pct": -1.27,
+      "mae_pct": -2.89,
       "horizon_returns_pct": {}
     },
     {
@@ -242,7 +269,7 @@
       "exit_price": null,
       "exit_reason": null,
       "net_return_pct": null,
-      "mfe_pct": 0.83,
+      "mfe_pct": 1.05,
       "mae_pct": -1.14,
       "horizon_returns_pct": {}
     },
@@ -262,14 +289,14 @@
       "probability_t1": 0.5794765529435103,
       "quick_accuracy": 0.5522388059701493,
       "status": "open",
-      "tp1_hit": false,
+      "tp1_hit": true,
       "tp2_hit": false,
       "stop_hit": false,
       "exit_date": null,
       "exit_price": null,
       "exit_reason": null,
       "net_return_pct": null,
-      "mfe_pct": 8.27,
+      "mfe_pct": 11.44,
       "mae_pct": 2.3,
       "horizon_returns_pct": {}
     },
@@ -296,7 +323,7 @@
       "exit_price": null,
       "exit_reason": null,
       "net_return_pct": null,
-      "mfe_pct": 1.25,
+      "mfe_pct": 3.94,
       "mae_pct": -2.33,
       "horizon_returns_pct": {}
     },
@@ -350,7 +377,7 @@
       "exit_price": null,
       "exit_reason": null,
       "net_return_pct": null,
-      "mfe_pct": 2.87,
+      "mfe_pct": 6.06,
       "mae_pct": -2.18,
       "horizon_returns_pct": {
         "t3": 0.18
@@ -448,14 +475,14 @@
     }
   ],
   "summary": {
-    "total_signals": 16,
-    "open_signals": 14,
+    "total_signals": 17,
+    "open_signals": 15,
     "closed_signals": 2,
     "win_rate_pct": 0.0,
     "avg_net_return_pct": -8.51,
     "profit_factor": 0.0,
-    "tp1_hit_rate_pct": 12.5,
-    "stop_rate_pct": 12.5,
+    "tp1_hit_rate_pct": 17.6,
+    "stop_rate_pct": 11.8,
     "horizons": {
       "t3": {
         "count": 4,
