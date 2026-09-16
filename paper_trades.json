@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-09-16T05:49:25.871983",
+  "updated_at": "2026-09-16T13:42:59.252599",
   "transaction_cost_pct": 0.3,
   "trades": [
     {
@@ -18,6 +18,33 @@
       "sector_score": 83.1,
       "probability_t1": 0.7007587071715028,
       "quick_accuracy": 0.5373134328358209,
+      "status": "open",
+      "tp1_hit": false,
+      "tp2_hit": false,
+      "stop_hit": false,
+      "exit_date": null,
+      "exit_price": null,
+      "exit_reason": null,
+      "net_return_pct": null,
+      "mfe_pct": null,
+      "mae_pct": null,
+      "horizon_returns_pct": {}
+    },
+    {
+      "id": "2026-09-16:BSR",
+      "ticker": "BSR",
+      "sector": "Dầu khí",
+      "signal_date": "2026-09-16",
+      "created_at": "2026-09-16T13:42:59.252599",
+      "action": "MUA THĂM DÒ",
+      "setup": "Breakout có khối lượng",
+      "entry_price": 30.45,
+      "stop_loss": 27.21,
+      "tp1": 33.69,
+      "tp2": 36.94,
+      "sector_score": 91.2,
+      "probability_t1": 0.6514693498768596,
+      "quick_accuracy": 0.5671641791044776,
       "status": "open",
       "tp1_hit": false,
       "tp2_hit": false,
@@ -54,7 +81,7 @@
       "exit_reason": null,
       "net_return_pct": null,
       "mfe_pct": 3.82,
-      "mae_pct": 0.59,
+      "mae_pct": 0.29,
       "horizon_returns_pct": {}
     },
     {
@@ -162,7 +189,7 @@
       "exit_reason": null,
       "net_return_pct": null,
       "mfe_pct": 0.35,
-      "mae_pct": -5.04,
+      "mae_pct": -5.99,
       "horizon_returns_pct": {}
     },
     {
@@ -217,7 +244,7 @@
       "exit_price": null,
       "exit_reason": null,
       "net_return_pct": null,
-      "mfe_pct": 3.76,
+      "mfe_pct": 4.6,
       "mae_pct": -0.79,
       "horizon_returns_pct": {
         "t3": 3.12
@@ -304,7 +331,7 @@
       "exit_price": null,
       "exit_reason": null,
       "net_return_pct": null,
-      "mfe_pct": 1.71,
+      "mfe_pct": 2.15,
       "mae_pct": -1.14,
       "horizon_returns_pct": {
         "t3": 1.41
@@ -451,7 +478,7 @@
       "exit_reason": "stop_loss",
       "net_return_pct": -8.46,
       "mfe_pct": -0.61,
-      "mae_pct": -9.72,
+      "mae_pct": -10.59,
       "horizon_returns_pct": {
         "t3": -6.12,
         "t5": -6.98
@@ -481,7 +508,7 @@
       "exit_reason": "stop_loss",
       "net_return_pct": -8.55,
       "mfe_pct": 0.69,
-      "mae_pct": -9.72,
+      "mae_pct": -10.59,
       "horizon_returns_pct": {
         "t3": -3.08,
         "t5": -6.12
@@ -519,14 +546,14 @@
     }
   ],
   "summary": {
-    "total_signals": 18,
-    "open_signals": 16,
+    "total_signals": 19,
+    "open_signals": 17,
     "closed_signals": 2,
     "win_rate_pct": 0.0,
     "avg_net_return_pct": -8.51,
     "profit_factor": 0.0,
-    "tp1_hit_rate_pct": 44.4,
-    "stop_rate_pct": 11.1,
+    "tp1_hit_rate_pct": 42.1,
+    "stop_rate_pct": 10.5,
     "horizons": {
       "t3": {
         "count": 12,
