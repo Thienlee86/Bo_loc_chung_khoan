@@ -1,8 +1,35 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-09-17T05:57:32.096776",
+  "updated_at": "2026-09-17T13:44:00.563473",
   "transaction_cost_pct": 0.3,
   "trades": [
+    {
+      "id": "2026-09-17:ACB",
+      "ticker": "ACB",
+      "sector": "Ngân hàng",
+      "signal_date": "2026-09-17",
+      "created_at": "2026-09-17T13:44:00.563473",
+      "action": "MUA THĂM DÒ",
+      "setup": "Breakout có khối lượng",
+      "entry_price": 22.75,
+      "stop_loss": 22.25,
+      "tp1": 23.25,
+      "tp2": 23.75,
+      "sector_score": 63.7,
+      "probability_t1": 0.2480926931494191,
+      "quick_accuracy": 0.5074626865671642,
+      "status": "open",
+      "tp1_hit": false,
+      "tp2_hit": false,
+      "stop_hit": false,
+      "exit_date": null,
+      "exit_price": null,
+      "exit_reason": null,
+      "net_return_pct": null,
+      "mfe_pct": null,
+      "mae_pct": null,
+      "horizon_returns_pct": {}
+    },
     {
       "id": "2026-09-16:DPM",
       "ticker": "DPM",
@@ -27,7 +54,7 @@
       "exit_reason": null,
       "net_return_pct": null,
       "mfe_pct": -0.86,
-      "mae_pct": -2.15,
+      "mae_pct": -2.79,
       "horizon_returns_pct": {}
     },
     {
@@ -54,7 +81,7 @@
       "exit_reason": null,
       "net_return_pct": null,
       "mfe_pct": 4.27,
-      "mae_pct": -0.82,
+      "mae_pct": -1.81,
       "horizon_returns_pct": {}
     },
     {
@@ -108,7 +135,7 @@
       "exit_reason": null,
       "net_return_pct": null,
       "mfe_pct": 6.55,
-      "mae_pct": 2.29,
+      "mae_pct": 1.62,
       "horizon_returns_pct": {}
     },
     {
@@ -250,7 +277,7 @@
       "exit_price": null,
       "exit_reason": null,
       "net_return_pct": null,
-      "mfe_pct": 6.45,
+      "mfe_pct": 6.79,
       "mae_pct": -0.79,
       "horizon_returns_pct": {
         "t3": 3.12
@@ -552,14 +579,14 @@
     }
   ],
   "summary": {
-    "total_signals": 19,
-    "open_signals": 17,
+    "total_signals": 20,
+    "open_signals": 18,
     "closed_signals": 2,
     "win_rate_pct": 0.0,
     "avg_net_return_pct": -8.51,
     "profit_factor": 0.0,
-    "tp1_hit_rate_pct": 42.1,
-    "stop_rate_pct": 10.5,
+    "tp1_hit_rate_pct": 40.0,
+    "stop_rate_pct": 10.0,
     "horizons": {
       "t3": {
         "count": 15,
