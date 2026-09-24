@@ -1,8 +1,35 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-09-23T13:51:38.300364",
+  "updated_at": "2026-09-24T06:02:46.976621",
   "transaction_cost_pct": 0.3,
   "trades": [
+    {
+      "id": "2026-09-24:PVS",
+      "ticker": "PVS",
+      "sector": "Dầu khí",
+      "signal_date": "2026-09-24",
+      "created_at": "2026-09-24T06:02:46.976621",
+      "action": "MUA THĂM DÒ",
+      "setup": "Pullback quanh EMA20",
+      "entry_price": 32.52,
+      "stop_loss": 28.41,
+      "tp1": 36.63,
+      "tp2": 40.74,
+      "sector_score": 66.7,
+      "probability_t1": 0.4644747358349924,
+      "quick_accuracy": 0.5671641791044776,
+      "status": "open",
+      "tp1_hit": false,
+      "tp2_hit": false,
+      "stop_hit": false,
+      "exit_date": null,
+      "exit_price": null,
+      "exit_reason": null,
+      "net_return_pct": null,
+      "mfe_pct": null,
+      "mae_pct": null,
+      "horizon_returns_pct": {}
+    },
     {
       "id": "2026-09-23:HAH",
       "ticker": "HAH",
@@ -26,8 +53,8 @@
       "exit_price": null,
       "exit_reason": null,
       "net_return_pct": null,
-      "mfe_pct": null,
-      "mae_pct": null,
+      "mfe_pct": 1.43,
+      "mae_pct": 0.2,
       "horizon_returns_pct": {}
     },
     {
@@ -54,7 +81,7 @@
       "exit_reason": null,
       "net_return_pct": null,
       "mfe_pct": 0.47,
-      "mae_pct": -2.73,
+      "mae_pct": -5.8,
       "horizon_returns_pct": {}
     },
     {
@@ -81,7 +108,7 @@
       "exit_reason": null,
       "net_return_pct": null,
       "mfe_pct": 0.89,
-      "mae_pct": -0.16,
+      "mae_pct": -1.21,
       "horizon_returns_pct": {}
     },
     {
@@ -108,8 +135,10 @@
       "exit_reason": null,
       "net_return_pct": null,
       "mfe_pct": 0.84,
-      "mae_pct": -2.73,
-      "horizon_returns_pct": {}
+      "mae_pct": -5.8,
+      "horizon_returns_pct": {
+        "t3": -5.74
+      }
     },
     {
       "id": "2026-09-21:PLX",
@@ -135,8 +164,10 @@
       "exit_reason": null,
       "net_return_pct": null,
       "mfe_pct": 1.34,
-      "mae_pct": -1.67,
-      "horizon_returns_pct": {}
+      "mae_pct": -2.9,
+      "horizon_returns_pct": {
+        "t3": -3.07
+      }
     },
     {
       "id": "2026-09-21:PET",
@@ -161,9 +192,11 @@
       "exit_price": 44.4,
       "exit_reason": "tp2",
       "net_return_pct": 15.48,
-      "mfe_pct": 15.78,
+      "mfe_pct": 22.56,
       "mae_pct": 0.91,
-      "horizon_returns_pct": {}
+      "horizon_returns_pct": {
+        "t3": 17.56
+      }
     },
     {
       "id": "2026-09-18:VPL",
@@ -189,7 +222,7 @@
       "exit_reason": null,
       "net_return_pct": null,
       "mfe_pct": 1.93,
-      "mae_pct": -2.74,
+      "mae_pct": -5.82,
       "horizon_returns_pct": {
         "t3": -1.2
       }
@@ -218,7 +251,7 @@
       "exit_reason": null,
       "net_return_pct": null,
       "mfe_pct": 1.26,
-      "mae_pct": -14.29,
+      "mae_pct": -15.97,
       "horizon_returns_pct": {
         "t3": -12.27
       }
@@ -247,7 +280,7 @@
       "exit_reason": null,
       "net_return_pct": null,
       "mfe_pct": 2.79,
-      "mae_pct": 0.16,
+      "mae_pct": -0.9,
       "horizon_returns_pct": {
         "t3": 0.39
       }
@@ -276,9 +309,10 @@
       "exit_reason": "stop_loss",
       "net_return_pct": -2.5,
       "mfe_pct": 0.44,
-      "mae_pct": -4.4,
+      "mae_pct": -6.37,
       "horizon_returns_pct": {
-        "t3": -3.16
+        "t3": -3.16,
+        "t5": -6.01
       }
     },
     {
@@ -334,7 +368,7 @@
       "exit_price": null,
       "exit_reason": null,
       "net_return_pct": null,
-      "mfe_pct": 4.93,
+      "mfe_pct": 5.42,
       "mae_pct": -2.13,
       "horizon_returns_pct": {
         "t3": 2.16,
@@ -515,7 +549,7 @@
       "exit_reason": null,
       "net_return_pct": null,
       "mfe_pct": 2.72,
-      "mae_pct": -4.47,
+      "mae_pct": -5.84,
       "horizon_returns_pct": {
         "t3": -0.11,
         "t5": 1.45
@@ -566,16 +600,16 @@
       "sector_score": 61.7,
       "probability_t1": 0.4726025401905638,
       "quick_accuracy": 0.5671641791044776,
-      "status": "open",
+      "status": "closed",
       "tp1_hit": false,
       "tp2_hit": false,
-      "stop_hit": false,
-      "exit_date": null,
-      "exit_price": null,
-      "exit_reason": null,
-      "net_return_pct": null,
+      "stop_hit": true,
+      "exit_date": "2026-09-24",
+      "exit_price": 65.85,
+      "exit_reason": "stop_loss",
+      "net_return_pct": -9.62,
       "mfe_pct": 1.76,
-      "mae_pct": -7.74,
+      "mae_pct": -9.67,
       "horizon_returns_pct": {
         "t3": -1.84,
         "t5": -0.33
@@ -635,7 +669,7 @@
       "exit_reason": null,
       "net_return_pct": null,
       "mfe_pct": 2.15,
-      "mae_pct": -1.36,
+      "mae_pct": -2.46,
       "horizon_returns_pct": {
         "t3": 1.41,
         "t5": 0.97
@@ -786,7 +820,7 @@
       "exit_reason": "stop_loss",
       "net_return_pct": -8.46,
       "mfe_pct": -0.61,
-      "mae_pct": -10.59,
+      "mae_pct": -12.33,
       "horizon_returns_pct": {
         "t3": -6.12,
         "t5": -6.98,
@@ -817,7 +851,7 @@
       "exit_reason": "stop_loss",
       "net_return_pct": -8.55,
       "mfe_pct": 0.69,
-      "mae_pct": -10.59,
+      "mae_pct": -12.33,
       "horizon_returns_pct": {
         "t3": -3.08,
         "t5": -6.12,
@@ -857,24 +891,24 @@
     }
   ],
   "summary": {
-    "total_signals": 29,
+    "total_signals": 30,
     "open_signals": 24,
-    "closed_signals": 5,
-    "win_rate_pct": 40.0,
-    "avg_net_return_pct": 0.82,
-    "profit_factor": 1.21,
-    "tp1_hit_rate_pct": 31.0,
-    "stop_rate_pct": 10.3,
+    "closed_signals": 6,
+    "win_rate_pct": 33.3,
+    "avg_net_return_pct": -0.92,
+    "profit_factor": 0.81,
+    "tp1_hit_rate_pct": 30.0,
+    "stop_rate_pct": 13.3,
     "horizons": {
       "t3": {
-        "count": 23,
-        "win_rate_pct": 52.2,
-        "avg_return_pct": -0.16
+        "count": 26,
+        "win_rate_pct": 50.0,
+        "avg_return_pct": 0.2
       },
       "t5": {
-        "count": 19,
-        "win_rate_pct": 63.2,
-        "avg_return_pct": 0.7
+        "count": 20,
+        "win_rate_pct": 60.0,
+        "avg_return_pct": 0.37
       },
       "t10": {
         "count": 4,
@@ -923,6 +957,12 @@
       "sector": "Hóa chất",
       "count": 1,
       "avg_return_pct": -4.13,
+      "win_rate_pct": 0.0
+    },
+    {
+      "sector": "Ngân hàng",
+      "count": 1,
+      "avg_return_pct": -6.01,
       "win_rate_pct": 0.0
     }
   ]
